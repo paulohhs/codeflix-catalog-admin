@@ -4,13 +4,13 @@ from uuid import UUID
 import pytest
 
 from src.core.category.application.category_repository import CategoryRepository
-from src.core.category.application.create_category import (
+from src.core.category.application.usecases.create_category import (
     CreateCategory,
     CreateCategoryRequest,
     CreateCategoryResponse,
     InvalidCategoryData,
 )
-from src.core.category.application.exceptions import (
+from src.core.category.application.usecases.exceptions import (
     InvalidCategoryData,
 )
 

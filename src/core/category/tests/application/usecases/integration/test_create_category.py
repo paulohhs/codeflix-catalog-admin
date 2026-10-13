@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from src.core.category.application.create_category import (
+from src.core.category.application.usecases.create_category import (
     CreateCategory,
     CreateCategoryRequest,
     CreateCategoryResponse,
