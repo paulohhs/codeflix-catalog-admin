@@ -14,7 +14,7 @@ class TestCategory:
 
     def test_category_must_be_created_with_id_as_uuid(self):
         category = Category(name="Test Category")
-        
+
         assert isinstance(category.id, UUID)
 
     def test_created_category_with_default_values(self):
@@ -78,3 +78,34 @@ class TestUpdateCategory:
 
         with pytest.raises(ValueError, match="name must have less than 256 characters"):
             category.update_category(name="a" * 256, description="New Description")
+
+
+class TestActivateCategory:
+    def test_activate_inactive_category(self):
+        category = Category(name="Test Category", is_active=False)
+
+        category.activate()
+
+        assert category.is_active == True
+
+    def test_activate_active_category(self):
+        category = Category(name="Test Category", is_active=True)
+
+        category.activate()
+
+        assert category.is_active == True
+
+class TestDeactivateCategory:
+    def test_deactivate_inactive_category(self):
+        category = Category(name="Test Category", is_active=False)
+
+        category.deactivate()
+
+        assert category.is_active == False
+
+    def test_deactivate_active_category(self):
+        category = Category(name="Test Category", is_active=True)
+
+        category.deactivate()
+
+        assert category.is_active == False
