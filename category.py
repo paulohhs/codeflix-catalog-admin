@@ -22,6 +22,11 @@ class Category:
     def __repr__(self):
         return f"<Category {self.name} ({self.id})>"
 
+    def __eq__(self, other):
+        if not isinstance(other, Category):
+            return False
+        return self.id == other.id
+
     def validate(self):
         if not self.name:
             raise ValueError("name cannot be empty")
