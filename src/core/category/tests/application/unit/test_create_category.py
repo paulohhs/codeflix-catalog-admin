@@ -7,6 +7,7 @@ from src.core.category.application.category_repository import CategoryRepository
 from src.core.category.application.create_category import (
     CreateCategory,
     CreateCategoryRequest,
+    CreateCategoryResponse,
     InvalidCategoryData,
 )
 from src.core.category.application.exceptions import (
@@ -24,8 +25,10 @@ class TestCreateCategory:
             is_active=True,
         )
 
-        category_id = use_case.execute(request=request)
-
+        category_response = use_case.execute(request=request)
+        assert isinstance(category_response, CreateCategoryResponse)
+        
+        category_id = category_response.id
         assert category_id is not None
         assert isinstance(category_id, UUID)
         assert repository.save.called
