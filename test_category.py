@@ -14,16 +14,19 @@ class TestCategory:
 
     def test_category_must_be_created_with_id_as_uuid(self):
         category = Category(name="Test Category")
+        
         assert isinstance(category.id, UUID)
 
     def test_created_category_with_default_values(self):
         category = Category(name="Test Category")
+
         assert category.name == "Test Category"
         assert category.description == ""
         assert category.is_active == True
 
     def test_category_is_created_as_active_by_default(self):
         category = Category(name="Test Category")
+
         assert category.is_active == True
 
     def test_category_is_created_with_provided_values(self):
@@ -34,13 +37,19 @@ class TestCategory:
             description="A test category", 
             is_active=False
         )
+
         assert category.id == category_id
         assert category.name == "Test Category"
         assert category.description == "A test category"
         assert category.is_active == False
 
+    def test_cannot_create_category_with_empty_name(self):
+        with pytest.raises(ValueError, match="name cannot be empty"):
+            Category(name="")
+
     def test_category_str_representation(self):
         category = Category(name="Test Category", description="A test category", is_active=True)
+
         assert str(category) == "Test Category - A test category (True)"
 
     def test_category_repr_representation(self):
@@ -51,4 +60,21 @@ class TestCategory:
             description="A test category",
             is_active=True
         )
+
         assert repr(category) == f"<Category Test Category ({category_id})>"
+
+
+class TestUpdateCategory:
+    def test_update_category_with_name_and_description(self):
+        category = Category(name="Old Name", description="Old Description")
+
+        category.update_category(name="New Name", description="New Description")
+
+        assert category.name == "New Name"
+        assert category.description == "New Description"
+
+    def test_update_category_with_invalid_name(self):
+        category = Category(name="Old Name", description="Old Description")
+
+        with pytest.raises(ValueError, match="name must have less than 256 characters"):
+            category.update_category(name="a" * 256, description="New Description")
