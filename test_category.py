@@ -95,6 +95,7 @@ class TestActivateCategory:
 
         assert category.is_active == True
 
+
 class TestDeactivateCategory:
     def test_deactivate_inactive_category(self):
         category = Category(name="Test Category", is_active=False)
@@ -109,3 +110,23 @@ class TestDeactivateCategory:
         category.deactivate()
 
         assert category.is_active == False
+
+
+class TestEquality:
+    def test_when_categories_have_same_id_they_are_equal(self):
+        category_id = uuid.uuid4()
+        category_1 = Category(id=category_id, name="Category")
+        category_2 = Category(id=category_id, name="Category")
+
+        assert category_1 == category_2
+
+    def test_equality_different_classes(self):
+        class Dummy:
+            pass
+
+        category_id = uuid.uuid4()
+        category = Category(id=category_id, name="Category")
+        dummy = Dummy()
+        dummy.id = category_id
+
+        assert category != dummy
