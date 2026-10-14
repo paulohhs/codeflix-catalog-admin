@@ -1,4 +1,7 @@
+import uuid
+
 from rest_framework.test import APIClient
+from rest_framework import status
 import pytest
 
 from src.core.category.domain.category import Category
@@ -26,16 +29,10 @@ def category_repository() -> DjangoORMCategoryRepository:
     return DjangoORMCategoryRepository()
 
 
-@pytest.fixture
-def api_client():
-    return APIClient()
-
-
 @pytest.mark.django_db
-class TestCategoryAPI:
+class TestListAPI:
     def test_list_categories(
         self,
-        api_client: APIClient,
         category_movie: Category,
         category_documentary: Category,
         category_repository: DjangoORMCategoryRepository,
@@ -44,7 +41,7 @@ class TestCategoryAPI:
         category_repository.save(category_documentary)
 
         url = "/api/categories/"
-        response = api_client.get(url)
+        response = APIClient().get(url)
 
         expected_data = [
             {
@@ -61,5 +58,43 @@ class TestCategoryAPI:
             },
         ]
 
-        assert response.status_code == 200
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == 2
         assert response.data == expected_data
+
+
+@pytest.mark.django_db
+class TestRetrieveAPI:
+    def test_when_id_is_invalid_return_400(self):
+        url = '/api/categories/1234567/'
+
+        response = APIClient().get(url)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_return_category_when_exists(
+        self,
+        category_movie: Category,
+        category_documentary: Category,
+        category_repository: DjangoORMCategoryRepository,
+    ):
+        category_repository.save(category_movie)
+        category_repository.save(category_documentary)
+
+        url = f"/api/categories/{category_documentary.id}/"
+        response = APIClient().get(url)
+
+        expected_data = {
+            "id": str(category_documentary.id),
+            "name": category_documentary.name,
+            "description": category_documentary.description,
+            "is_active": category_documentary.is_active,
+        }
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == expected_data
+
+    def test_return_404_when_category_not_exists(self):
+        url = f"/api/categories/{uuid.uuid4()}/"
+        response = APIClient().get(url)
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
