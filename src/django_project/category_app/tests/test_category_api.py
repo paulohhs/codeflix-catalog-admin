@@ -1,40 +1,53 @@
 from django.test import TestCase
-from rest_framework.test import APITestCase
+import pytest
 
 from src.core.category.domain.category import Category
 from src.django_project.category_app.repository import DjangoORMCategoryRepository
 
 
-class TestCategoryAPI(APITestCase):
-    def test_list_categories(self):
-        category_filme = Category(
+class TestCategoryAPI:
+    @pytest.fixture
+    def category_movie(self) -> Category:
+        return Category(
             name="Movie",
             description="Movie description",
         )
-        category_serie = Category(
-            name="Documentary",
-            description="Documentary description",
+
+    @pytest.fixture
+    def category_documentary(self) -> Category:
+        return Category(
+            name="Movie",
+            description="Movie description",
         )
 
-        repository = DjangoORMCategoryRepository()
-        repository.save(category_filme)
-        repository.save(category_serie)
+    @pytest.fixture
+    def category_repository(self) -> DjangoORMCategoryRepository:
+        return DjangoORMCategoryRepository()
+    
+    def test_list_categories(
+        self,
+        category_movie: Category,
+        category_documentary: Category,
+        category_repository: DjangoORMCategoryRepository,
+    ):
+        category_repository.save(category_movie)
+        category_repository.save(category_documentary)
 
         url = "/api/categories/"
         response = self.client.get(url)
 
         expected_data = [
             {
-                "id": str(category_filme.id),
-                "name": category_filme.name,
-                "description": category_filme.description,
-                "is_active": category_filme.is_active,
+                "id": str(category_movie.id),
+                "name": category_movie.name,
+                "description": category_movie.description,
+                "is_active": category_movie.is_active,
             }, 
             {
-                "id": str(category_serie.id),
-                "name": category_serie.name,
-                "description": category_serie.description,
-                "is_active": category_serie.is_active,
+                "id": str(category_documentary.id),
+                "name": category_documentary.name,
+                "description": category_documentary.description,
+                "is_active": category_documentary.is_active,
             },
         ]
 
