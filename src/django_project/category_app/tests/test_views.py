@@ -102,3 +102,50 @@ class TestRetrieveAPI:
         response = APIClient().get(url)
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+@pytest.mark.django_db
+class TestCreateAPI:
+    def test_when_payload_is_invalid_then_return_400(self):
+        url = '/api/categories/'
+
+        response = APIClient().post(
+            url,
+            data={
+                "name": "",
+                "description": "Movie description",
+            }
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_when_payload_is_valid_then_create_category_and_return_201(
+        self,
+        category_repository: DjangoORMCategoryRepository,
+    ):
+        url = '/api/categories/'
+        
+        response = APIClient().post(
+            url,
+            data={
+                "name": "Movie",
+                "description": "Movie description",
+            }
+        )
+        assert response.status_code == status.HTTP_201_CREATED
+        assert category_repository.list() == [
+            Category(
+                id=uuid.UUID(response.data["id"]),
+                name="Movie",
+                description="Movie description",
+                is_active=True,
+            )
+        ]
+
+
+@pytest.mark.django_db
+class TestUpdateAPI:
+    def test(self):
+        pass
+
+    def test_(self):
+        pass
