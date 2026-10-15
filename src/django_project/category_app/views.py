@@ -7,6 +7,7 @@ from rest_framework.request import Request
 from rest_framework.status import (
     HTTP_200_OK,
     HTTP_201_CREATED,
+    HTTP_204_NO_CONTENT,
     HTTP_404_NOT_FOUND,
 )
 
@@ -24,12 +25,17 @@ from src.core.category.application.usecases.list_category import (
     ListCategoryRequest,
 )
 from django_project.category_app.repository import DjangoORMCategoryRepository
+from src.core.category.application.usecases.update_category import (
+    UpdateCategory, 
+    UpdateCategoryRequest,
+)
 from src.django_project.category_app.serializers import (
     CreateCategoryRequestSerializer,
     CreateCategoryResponseSerializer,
     ListCategoryResponseSerializer, 
     RetrieveCategoryRequestSerializer,
-    RetrieveCategoryResponseSerializer
+    RetrieveCategoryResponseSerializer,
+    UpdateCategoryRequestSerializer
 )
 
 
@@ -79,3 +85,22 @@ class CategoryViewSet(viewsets.ViewSet):
             status=HTTP_201_CREATED,
             data=CreateCategoryResponseSerializer(instance=output).data,
         )
+
+    def update(self, request: Request, pk=None) -> Response:
+        serializer = UpdateCategoryRequestSerializer(
+            data={
+                **request.data,
+                "id": pk,
+            }
+        )
+        serializer.is_valid(raise_exception=True)
+
+        input = UpdateCategoryRequest(**serializer.validated_data)
+        use_case = UpdateCategory(repository=DjangoORMCategoryRepository())
+        
+        try:
+            use_case.execute(request=input)
+        except CategoryNotFound:
+            return Response(status=HTTP_404_NOT_FOUND)
+
+        return Response(status=HTTP_204_NO_CONTENT)
