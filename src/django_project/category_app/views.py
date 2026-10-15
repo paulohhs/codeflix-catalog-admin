@@ -124,7 +124,7 @@ class CategoryViewSet(viewsets.ViewSet):
 
         return Response(status=HTTP_204_NO_CONTENT)
 
-    def partial_update(self, request: Request, pk=None) -> Response:
+    def partial_update(self, request: Request, pk: UUID=None) -> Response:
         serializer = UpdateCategoryRequestSerializer(
             data={
                 **request.data,
