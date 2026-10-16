@@ -28,7 +28,7 @@ from src.core.category.application.usecases.list_category import (
     ListCategory,
     ListCategoryRequest,
 )
-from django_project.category_app.repository import DjangoORMCategoryRepository
+from src.django_project.category_app.repository import DjangoORMCategoryRepository
 from src.core.category.application.usecases.update_category import (
     UpdateCategory, 
     UpdateCategoryRequest,
