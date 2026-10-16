@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class GenreAppConfig(AppConfig):
-    name = 'genre_app'
+    name = 'src.django_project.genre_app'
