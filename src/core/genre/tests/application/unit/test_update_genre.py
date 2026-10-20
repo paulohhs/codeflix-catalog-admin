@@ -57,7 +57,7 @@ class TestUpdateGenre:
             id=uuid.uuid4(),
             name="Comedy",
             is_active=True,
-            category_ids={uuid.uuid4(), uuid.uuid4()}
+            categories={uuid.uuid4(), uuid.uuid4()}
         )
 
         with pytest.raises(GenreNotFound):
@@ -84,7 +84,7 @@ class TestUpdateGenre:
             id=genre.id,
             name="Terror",
             is_active=True,
-            category_ids={documentary_category.id}
+            categories={documentary_category.id}
         )
         with pytest.raises(RelatedCategoriesNotFound):
             use_case.execute(input=input)
@@ -114,7 +114,7 @@ class TestUpdateGenre:
             id=genre.id,
             name="",
             is_active=True,
-            category_ids={movie_category.id, documentary_category.id}
+            categories={movie_category.id, documentary_category.id}
         )
         with pytest.raises(InvalidGenre):
             use_case.execute(input=input)
@@ -149,7 +149,7 @@ class TestUpdateGenre:
             id=genre.id,
             name="Terror",
             is_active=True,
-            category_ids={movie_category.id, documentary_category.id}
+            categories={movie_category.id, documentary_category.id}
         )
 
         assert genre.name == "Comedy"
@@ -201,7 +201,7 @@ class TestUpdateGenre:
             id=genre.id,
             name="Terror",
             is_active=True,
-            category_ids={novel_category.id, cartoon_category.id}
+            categories={novel_category.id, cartoon_category.id}
         )
 
         assert genre.name == "Comedy"

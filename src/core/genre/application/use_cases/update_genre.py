@@ -24,7 +24,7 @@ class UpdateGenre:
         id: UUID
         name: str
         is_active: bool
-        category_ids: set[UUID]
+        categories: set[UUID]
 
     def execute(self, input: Input) -> None:
         genre = self.repository.get_by_id(id=input.id)
@@ -34,14 +34,14 @@ class UpdateGenre:
 
         category_ids = {category.id for category in self.category_repository.list()}
         
-        if not input.category_ids.issubset(category_ids):
+        if not input.categories.issubset(category_ids):
             raise RelatedCategoriesNotFound(
-                f"Categories not found: {input.category_ids - category_ids}"
+                f"Categories not found: {input.categories - category_ids}"
             )
 
         try:
             genre.change_name(name=input.name)
-            genre.categories = input.category_ids
+            genre.categories = input.categories
 
             if not isinstance(input.is_active, bool):
                 raise ValueError("is_active must be True or False")
@@ -50,7 +50,7 @@ class UpdateGenre:
                 genre.activate()
 
             if not input.is_active:
-                genre.deactivate
+                genre.deactivate()
 
         except ValueError as e:
             raise InvalidGenre(e)
