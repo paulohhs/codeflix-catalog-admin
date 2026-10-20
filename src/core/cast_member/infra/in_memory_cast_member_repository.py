@@ -1,32 +1,32 @@
 from uuid import UUID
 
-from src.core.genre.domain.genre_repository import GenreRepository
-from src.core.genre.domain.genre import Genre
+from src.core.cast_member.domain.cast_member_repository import CastMemberRepository
+from src.core.cast_member.domain.cast_member import CastMember
 
 
-class InMemoryGenreRepository(GenreRepository):
-    def __init__(self, genres = None):
-        self.genres = genres or []
+class InMemoryCastMemberRepository(CastMemberRepository):
+    def __init__(self, cast_members = None):
+        self.cast_members = cast_members or []
 
-    def save(self, genre: Genre) -> None:
-        self.genres.append(genre)
+    def save(self, cast_member: CastMember) -> None:
+        self.cast_members.append(cast_member)
 
-    def get_by_id(self, id: UUID) -> Genre | None:
+    def get_by_id(self, id: UUID) -> CastMember | None:
         return next(
-            (genre for genre in self.genres if genre.id == id), 
+            (cast_member for cast_member in self.cast_members if cast_member.id == id),
             None
         )
 
     def delete(self, id: UUID) -> None:
-        genre = self.get_by_id(id)
-        self.genres.remove(genre)
+        cast_member = self.get_by_id(id)
+        self.cast_members.remove(cast_member)
 
-    def update(self, genre: Genre) -> None:
-        old_genre = self.get_by_id(genre.id)
+    def update(self, cast_member: CastMember) -> None:
+        old_cast_member = self.get_by_id(cast_member.id)
 
-        if old_genre:
-            self.genres.remove(old_genre)
-            self.genres.append(genre)
+        if old_cast_member:
+            self.cast_members.remove(old_cast_member)
+            self.cast_members.append(cast_member)
 
-    def list(self) -> list[Genre]:
-        return [genre for genre in self.genres]
+    def list(self) -> list[CastMember]:
+        return [cast_member for cast_member in self.cast_members]
