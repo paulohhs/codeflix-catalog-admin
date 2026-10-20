@@ -26,7 +26,7 @@ class TestUpdateGenre:
             id=genre.id,
             name="Terror",
             is_active=True,
-            category_ids={movie_category.id, documentary_category.id}
+            categories={movie_category.id, documentary_category.id}
         )
         use_case.execute(input=input)
 
@@ -34,4 +34,4 @@ class TestUpdateGenre:
         assert updated_genre.id == genre.id
         assert updated_genre.name == input.name
         assert updated_genre.is_active == input.is_active
-        assert updated_genre.categories == input.category_ids
+        assert updated_genre.categories == input.categories
