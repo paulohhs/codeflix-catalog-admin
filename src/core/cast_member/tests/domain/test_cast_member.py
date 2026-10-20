@@ -34,7 +34,7 @@ class TestCastMember:
     def test_genre_str_representation(self):
         cast_member = CastMember(name="Member 1", type=TypeCastMember.ACTOR)
 
-        assert str(cast_member) == "Member 1 - (actor)"
+        assert str(cast_member) == "Member 1 - (ACTOR)"
 
     def test_genre_repr_representation(self):
         cast_member_id = uuid.uuid4()
