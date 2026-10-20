@@ -1,0 +1,42 @@
+from unittest.mock import create_autospec
+import uuid
+
+import pytest
+
+from src.core.cast_member.domain.cast_member import TypeCastMember
+from src.core.cast_member.application.use_cases.delete_cast_member import DeleteCastMember
+from src.core.cast_member.application.use_cases.exceptions import CastMemberNotFound
+from src.core.cast_member.domain.cast_member import CastMember
+from src.core.cast_member.domain.cast_member_repository import CastMemberRepository
+
+
+@pytest.fixture
+def mock_cast_member_repository() -> CastMemberRepository:
+    return create_autospec(CastMemberRepository)
+
+
+class TestDeleteCastMember:
+    def test_delete_cast_member_from_repository(
+        self,
+        mock_cast_member_repository,
+    ):
+        cast_member = CastMember(name="Test Member", type=TypeCastMember.ACTOR)
+        mock_cast_member_repository.get_by_id.return_value = cast_member
+
+        use_case = DeleteCastMember(repository=mock_cast_member_repository)
+        use_case.execute(input=DeleteCastMember.Input(id=cast_member.id))
+
+        mock_cast_member_repository.delete.assert_called_once_with(cast_member.id)
+
+    def test_when_cast_member_doesnt_exist_then_raise_not_found_exception(
+        self,
+        mock_cast_member_repository,
+    ):
+        mock_cast_member_repository.get_by_id.return_value = None
+
+        use_case = DeleteCastMember(repository=mock_cast_member_repository)
+
+        with pytest.raises(CastMemberNotFound, match="Cast member not found"):
+            use_case.execute(input=DeleteCastMember.Input(id=uuid.uuid4()))
+
+        mock_cast_member_repository.delete.assert_not_called
