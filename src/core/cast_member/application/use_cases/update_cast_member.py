@@ -4,7 +4,7 @@ from uuid import UUID
 from src.core.cast_member.application.use_cases.exceptions import (
     CastMemberNotFound, InvalidCastMember
 )
-from src.core.cast_member.domain.cast_member import TypeCastMember
+from src.core.cast_member.domain.cast_member import CastMemberType
 from src.core.cast_member.domain.cast_member_repository import CastMemberRepository
 
 
@@ -16,7 +16,7 @@ class UpdateCastMember:
     class Input:
         id: UUID
         name: str
-        type: TypeCastMember
+        type: CastMemberType
 
     def execute(self, input: UpdateCastMember.Input) -> None:
         cast_member = self.repository.get_by_id(input.id)

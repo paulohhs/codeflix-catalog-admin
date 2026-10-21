@@ -3,7 +3,7 @@ import uuid
 
 import pytest
 
-from src.core.cast_member.domain.cast_member import TypeCastMember
+from src.core.cast_member.domain.cast_member import CastMemberType
 from src.core.cast_member.application.use_cases.exceptions import (
     CastMemberNotFound,
     InvalidCastMember,
@@ -31,7 +31,7 @@ class TestUpdateGenre:
         input = UpdateCastMember.Input(
             id=uuid.uuid4(),
             name="Actor Member",
-            type=TypeCastMember.ACTOR
+            type=CastMemberType.ACTOR
         )
 
         with pytest.raises(CastMemberNotFound):
@@ -41,7 +41,7 @@ class TestUpdateGenre:
         self,
         mock_cast_member_repository,
     ):
-        cast_member = CastMember(name="Actor Member", type=TypeCastMember.ACTOR)
+        cast_member = CastMember(name="Actor Member", type=CastMemberType.ACTOR)
         mock_cast_member_repository.get_by_id.return_value = cast_member
 
         use_case = UpdateCastMember(
@@ -67,7 +67,7 @@ class TestUpdateGenre:
         self,
         mock_cast_member_repository,
     ):
-        cast_member = CastMember(name="Member", type=TypeCastMember.ACTOR)
+        cast_member = CastMember(name="Member", type=CastMemberType.ACTOR)
         mock_cast_member_repository.get_by_id.return_value = cast_member
 
         use_case = UpdateCastMember(
@@ -77,13 +77,13 @@ class TestUpdateGenre:
         input = UpdateCastMember.Input(
             id=cast_member.id,
             name="Member updated",
-            type=TypeCastMember.DIRECTOR,
+            type=CastMemberType.DIRECTOR,
         )
 
         assert cast_member.name == "Member"
-        assert cast_member.type == TypeCastMember.ACTOR
+        assert cast_member.type == CastMemberType.ACTOR
 
         use_case.execute(input=input)
 
         assert cast_member.name == "Member updated"
-        assert cast_member.type == TypeCastMember.DIRECTOR
+        assert cast_member.type == CastMemberType.DIRECTOR

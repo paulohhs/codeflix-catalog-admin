@@ -1,6 +1,6 @@
 import pytest
 
-from src.core.cast_member.domain.cast_member import TypeCastMember
+from src.core.cast_member.domain.cast_member import CastMemberType
 from src.core.cast_member.domain.cast_member import CastMember
 from src.django_project.cast_member_app.repository import DjangoORMCastMemberRepository
 from src.django_project.cast_member_app.models import CastMember as CastMemberORM
@@ -9,7 +9,7 @@ from src.django_project.cast_member_app.models import CastMember as CastMemberOR
 @pytest.mark.django_db
 class TestSave:
     def test_save_cast_member_in_database(self):
-        cast_member = CastMember(name="Test Member", type=TypeCastMember.ACTOR)
+        cast_member = CastMember(name="Test Member", type=CastMemberType.ACTOR)
         cast_member_repository = DjangoORMCastMemberRepository()
 
         assert CastMemberORM.objects.count() == 0
@@ -26,7 +26,7 @@ class TestSave:
 @pytest.mark.django_db
 class TestGet:
     def test_get_cast_member(self):
-        cast_member = CastMember(name="Test Member", type=TypeCastMember.ACTOR)
+        cast_member = CastMember(name="Test Member", type=CastMemberType.ACTOR)
         cast_member_repository = DjangoORMCastMemberRepository()
         cast_member_repository.save(cast_member=cast_member)
 
@@ -41,7 +41,7 @@ class TestGet:
 @pytest.mark.django_db
 class TestDelete:
     def test_delete_cast_member(self):
-        cast_member = CastMember(name="Test Member", type=TypeCastMember.ACTOR)
+        cast_member = CastMember(name="Test Member", type=CastMemberType.ACTOR)
         cast_member_repository = DjangoORMCastMemberRepository()
         cast_member_repository.save(cast_member=cast_member)
 
@@ -56,10 +56,10 @@ class TestList:
     def test_list_cast_member(self):
         cast_member_repository = DjangoORMCastMemberRepository()
 
-        cast_member_1 = CastMember(name="Test Member", type=TypeCastMember.ACTOR)
+        cast_member_1 = CastMember(name="Test Member", type=CastMemberType.ACTOR)
         cast_member_repository.save(cast_member=cast_member_1)
 
-        cast_member_2 = CastMember(name="Test Member", type=TypeCastMember.DIRECTOR)
+        cast_member_2 = CastMember(name="Test Member", type=CastMemberType.DIRECTOR)
         cast_member_repository.save(cast_member=cast_member_2)
 
         assert CastMemberORM.objects.count() == 2
@@ -76,14 +76,14 @@ class TestList:
 class TestUpdate:
     def test_update_cast_member(self):
         cast_member_repository = DjangoORMCastMemberRepository()
-        cast_member = CastMember(name="Test Member", type=TypeCastMember.ACTOR)
+        cast_member = CastMember(name="Test Member", type=CastMemberType.ACTOR)
         cast_member_repository.save(cast_member=cast_member)
 
         cast_member.change_name(name="Member updated")
-        cast_member.change_type(type=TypeCastMember.DIRECTOR)
+        cast_member.change_type(type=CastMemberType.DIRECTOR)
         cast_member_repository.update(cast_member=cast_member)
 
         updated_cast_member = CastMemberORM.objects.get(id=cast_member.id)
         assert updated_cast_member.id == cast_member.id
         assert updated_cast_member.name == "Member updated"
-        assert updated_cast_member.type == TypeCastMember.DIRECTOR
+        assert updated_cast_member.type == CastMemberType.DIRECTOR

@@ -14,9 +14,9 @@ class DeleteCastMember:
         id: UUID
 
     def execute(self, input: Input) -> None:
-        genre = self.repository.get_by_id(id=input.id)
+        cast_member = self.repository.get_by_id(id=input.id)
 
-        if not genre:
+        if not cast_member:
             raise CastMemberNotFound("Cast member not found")
 
         self.repository.delete(id=input.id)

@@ -2,7 +2,7 @@ from uuid import uuid4
 
 from django.db import models
 
-from src.core.cast_member.domain.cast_member import TypeCastMember
+from src.core.cast_member.domain.cast_member import CastMemberType
 
 
 class CastMember(models.Model):
@@ -11,7 +11,7 @@ class CastMember(models.Model):
     id = models.UUIDField(primary_key=True, editable=False, default=uuid4)
     name = models.CharField(max_length=255)
     type = models.CharField(choices=[
-        (t.value, t.name) for t in TypeCastMember
+        (t.value, t.name) for t in CastMemberType
     ])
 
     class Meta:

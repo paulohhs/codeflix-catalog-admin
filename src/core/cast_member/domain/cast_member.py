@@ -4,7 +4,7 @@ from enum import StrEnum
 from uuid import UUID
 
 
-class TypeCastMember(StrEnum):
+class CastMemberType(StrEnum):
     ACTOR = "ACTOR"
     DIRECTOR = "DIRECTOR"
 
@@ -12,7 +12,7 @@ class TypeCastMember(StrEnum):
 @dataclass
 class CastMember:
     name: str
-    type: TypeCastMember
+    type: CastMemberType
     id: UUID = field(default_factory=uuid.uuid4)
 
     def __post_init__(self):
@@ -36,13 +36,13 @@ class CastMember:
         if len(self.name) > 255:
             raise ValueError("name must have less than 256 characters")
 
-        if not isinstance(self.type, TypeCastMember):
-            raise ValueError("type must be a TypeCastMember")
+        if not isinstance(self.type, CastMemberType):
+            raise ValueError("type must be a CastMemberType")
 
     def change_name(self, name: str) -> None:
         self.name = name
         self.validate()
 
-    def change_type(self, type: TypeCastMember) -> None:
+    def change_type(self, type: CastMemberType) -> None:
         self.type = type
         self.validate()

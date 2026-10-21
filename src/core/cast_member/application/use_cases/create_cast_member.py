@@ -3,7 +3,7 @@ from uuid import UUID
 
 from src.core.cast_member.application.use_cases.exceptions import InvalidCastMember
 from src.core.cast_member.domain.cast_member import CastMember
-from src.core.cast_member.domain.cast_member import TypeCastMember
+from src.core.cast_member.domain.cast_member import CastMemberType
 from src.core.cast_member.domain.cast_member_repository import CastMemberRepository
 
 
@@ -14,7 +14,7 @@ class CreateCastMember:
     @dataclass
     class Input:
         name: str
-        type: TypeCastMember
+        type: CastMemberType
 
     @dataclass
     class Output:

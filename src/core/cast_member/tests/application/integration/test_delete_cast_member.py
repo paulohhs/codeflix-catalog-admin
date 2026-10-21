@@ -2,7 +2,7 @@ import uuid
 
 import pytest
 
-from src.core.cast_member.domain.cast_member import TypeCastMember
+from src.core.cast_member.domain.cast_member import CastMemberType
 from src.core.cast_member.application.use_cases.delete_cast_member import DeleteCastMember
 from src.core.cast_member.application.use_cases.exceptions import CastMemberNotFound
 from src.core.cast_member.domain.cast_member import CastMember
@@ -13,7 +13,7 @@ class TestDeleteCastMember:
     def test_delete_cast_member_from_repository(
         self,
     ):
-        cast_member = CastMember(name="Test Member", type=TypeCastMember.ACTOR)
+        cast_member = CastMember(name="Test Member", type=CastMemberType.ACTOR)
         mock_cast_member_repository = InMemoryCastMemberRepository(cast_members=[cast_member])
 
         use_case = DeleteCastMember(repository=mock_cast_member_repository)

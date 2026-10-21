@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from src.core.cast_member.domain.cast_member import CastMember, TypeCastMember
+from src.core.cast_member.domain.cast_member import CastMember, CastMemberType
 from src.core.cast_member.domain.cast_member_repository import CastMemberRepository
 from src.django_project.cast_member_app.models import CastMember as CastMemberORM
 
@@ -22,7 +22,7 @@ class DjangoORMCastMemberRepository(CastMemberRepository):
         return CastMember(
             id=cast_member_model.id,
             name=cast_member_model.name,
-            type=TypeCastMember(cast_member_model.type),
+            type=CastMemberType(cast_member_model.type),
         )
 
     def delete(self, id: UUID) -> None:
@@ -33,7 +33,7 @@ class DjangoORMCastMemberRepository(CastMemberRepository):
             CastMember(
                 id=cast_member_model.id,
                 name=cast_member_model.name,
-                type=TypeCastMember(cast_member_model.type),
+                type=CastMemberType(cast_member_model.type),
             ) for cast_member_model in CastMemberORM.objects.all()
         ]
 

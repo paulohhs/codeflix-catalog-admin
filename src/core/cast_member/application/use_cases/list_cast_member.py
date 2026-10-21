@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from core.cast_member.domain.cast_member import TypeCastMember
+from core.cast_member.domain.cast_member import CastMemberType
 from src.core.cast_member.domain.cast_member_repository import CastMemberRepository
 
 
@@ -9,7 +9,7 @@ from src.core.cast_member.domain.cast_member_repository import CastMemberReposit
 class CastMemberOutput:
     id: UUID
     name: str
-    type: TypeCastMember
+    type: CastMemberType
 
 
 class ListCastMember:

@@ -1,5 +1,5 @@
 from core.cast_member.domain.cast_member import (
-    TypeCastMember,
+    CastMemberType,
     CastMember,
 )
 from core.cast_member.infra.in_memory_cast_member_repository import InMemoryCastMemberRepository
@@ -15,11 +15,11 @@ class TestListCastMember:
 
         actor_member = CastMember(
             name="Actor Member",
-            type=TypeCastMember.ACTOR,
+            type=CastMemberType.ACTOR,
         )
         director_member = CastMember(
             name="Director Member",
-            type=TypeCastMember.DIRECTOR,
+            type=CastMemberType.DIRECTOR,
         )
         cast_member_repository.save(actor_member)
         cast_member_repository.save(director_member)

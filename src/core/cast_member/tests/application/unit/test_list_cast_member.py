@@ -1,7 +1,7 @@
 from unittest.mock import create_autospec
 
 from core.cast_member.domain.cast_member import (
-    TypeCastMember,
+    CastMemberType,
     CastMember,
 )
 from src.core.cast_member.application.use_cases.list_cast_member import (
@@ -17,11 +17,11 @@ class TestListCastMember:
 
         actor_member = CastMember(
             name="Actor Member",
-            type=TypeCastMember.ACTOR,
+            type=CastMemberType.ACTOR,
         )
         director_member = CastMember(
             name="Director Member",
-            type=TypeCastMember.DIRECTOR,
+            type=CastMemberType.DIRECTOR,
         )
         cast_member_repository.list.return_value = [actor_member, director_member]
 
