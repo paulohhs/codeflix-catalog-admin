@@ -1,3 +1,18 @@
+from uuid import uuid4
+
 from django.db import models
 
-# Create your models here.
+from src.core.cast_member.domain.cast_member import TypeCastMember
+
+
+class CastMember(models.Model):
+    app_label = "cast_member_app"
+
+    id = models.UUIDField(primary_key=True, editable=False, default=uuid4)
+    name = models.CharField(max_length=255)
+    type = models.CharField(choices=[
+        (t.value, t.name) for t in TypeCastMember
+    ])
+
+    class Meta:
+        db_table = 'cast_member'
