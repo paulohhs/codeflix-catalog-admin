@@ -109,12 +109,12 @@ class TestCreateGenre:
 
     def test_create_genre_without_categories(
         self,
-        mock_category_repository_with_categories,
+        mock_empty_category_repository,
         mock_genre_repository,
     ):
         use_case = CreateGenre(
             repository=mock_genre_repository,
-            category_repository=mock_category_repository_with_categories
+            category_repository=mock_empty_category_repository
         )
         input = CreateGenre.Input(name="Comedy")
 
@@ -126,6 +126,6 @@ class TestCreateGenre:
                 id=output.id,
                 name="Comedy",
                 is_active=True,
-                categories={}
+                categories=set()
             )
         )

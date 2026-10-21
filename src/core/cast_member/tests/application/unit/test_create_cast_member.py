@@ -56,7 +56,7 @@ class TestCreateCastMember:
         mock_cast_member_repository.save.assert_called_once_with(
             CastMember(
                 id=output.id,
-                name="Comedy",
+                name="Test Member",
                 type=CastMemberType.ACTOR
             )
         )
