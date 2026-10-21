@@ -2,7 +2,7 @@ import pytest
 from uuid import UUID
 import uuid
 
-from core.cast_member.domain.cast_member import CastMember, CastMemberType
+from src.core.cast_member.domain.cast_member import CastMember, CastMemberType
 
 
 class TestCastMember:

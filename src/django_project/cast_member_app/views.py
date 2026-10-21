@@ -4,7 +4,7 @@ from rest_framework.request import Request
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_201_CREATED, HTTP_404_NOT_FOUND, \
     HTTP_204_NO_CONTENT
 
-from core.cast_member.application.use_cases.update_cast_member import UpdateCastMember
+from src.core.cast_member.application.use_cases.update_cast_member import UpdateCastMember
 from src.core.cast_member.application.use_cases.delete_cast_member import DeleteCastMember
 from src.core.cast_member.application.use_cases.exceptions import CastMemberNotFound
 from src.core.cast_member.application.use_cases.exceptions import InvalidCastMember
@@ -12,8 +12,8 @@ from src.core.cast_member.application.use_cases.create_cast_member import Create
 from src.core.cast_member.application.use_cases.list_cast_member import (
     ListCastMember
 )
-from django_project.cast_member_app.repository import DjangoORMCastMemberRepository
-from django_project.cast_member_app.serializers import ListCastMemberOutputSerializer, CreateCastMemberInputSerializer, \
+from src.django_project.cast_member_app.repository import DjangoORMCastMemberRepository
+from src.django_project.cast_member_app.serializers import ListCastMemberOutputSerializer, CreateCastMemberInputSerializer, \
     CreateCastMemberOutputSerializer, DeleteCastMemberInputSerializer, UpdateCastMemberInputSerializer
 
 

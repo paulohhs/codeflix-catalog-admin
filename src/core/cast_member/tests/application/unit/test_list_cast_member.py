@@ -1,6 +1,6 @@
 from unittest.mock import create_autospec
 
-from core.cast_member.domain.cast_member import (
+from src.core.cast_member.domain.cast_member import (
     CastMemberType,
     CastMember,
 )

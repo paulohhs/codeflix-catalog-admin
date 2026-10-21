@@ -1,8 +1,8 @@
-from core.cast_member.domain.cast_member import (
+from src.core.cast_member.domain.cast_member import (
     CastMemberType,
     CastMember,
 )
-from core.cast_member.infra.in_memory_cast_member_repository import InMemoryCastMemberRepository
+from src.core.cast_member.infra.in_memory_cast_member_repository import InMemoryCastMemberRepository
 from src.core.cast_member.application.use_cases.list_cast_member import (
     ListCastMember,
     CastMemberOutput,
