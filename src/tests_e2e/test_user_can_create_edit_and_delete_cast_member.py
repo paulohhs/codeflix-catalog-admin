@@ -10,12 +10,12 @@ class TestUserCanCreateEditAndDeleteCastMember:
         api_client = APIClient()
 
         # Verifica que lista esta vazia
-        list_response = api_client.get('/api/cast-members/')
+        list_response = api_client.get('/api/cast_members/')
         assert list_response.data == {"data": []}
 
         # Criar um cast member
         create_response = api_client.post(
-            '/api/cast-members/',
+            '/api/cast_members/',
             data={
                 "name": "Actor Member",
                 "type": "ACTOR",
@@ -26,7 +26,7 @@ class TestUserCanCreateEditAndDeleteCastMember:
 
         # Verifica que cast member criado aparece na listagem
         # e está ativa
-        list_response = api_client.get('/api/cast-members/')
+        list_response = api_client.get('/api/cast_members/')
         assert list_response.status_code == status.HTTP_200_OK
         assert list_response.data == {
             "data": [
@@ -40,7 +40,7 @@ class TestUserCanCreateEditAndDeleteCastMember:
 
         # Atualiza cast member
         update_response = api_client.put(
-            f'/api/cast-members/{created_cast_member_id}/',
+            f'/api/cast_members/{created_cast_member_id}/',
             data={
                 "name": "Member updated",
                 "type": "DIRECTOR",
@@ -49,16 +49,16 @@ class TestUserCanCreateEditAndDeleteCastMember:
         assert update_response.status_code == status.HTTP_204_NO_CONTENT
 
         # Verifica que cast member foi atualizado
-        list_response = api_client.get('/api/cast-members/')
+        list_response = api_client.get('/api/cast_members/')
         assert list_response.status_code == status.HTTP_200_OK
         assert list_response.data["data"][0]["id"] == created_cast_member_id
         assert list_response.data["data"][0]["name"] == "Member updated"
         assert list_response.data["data"][0]["type"] == "DIRECTOR"
 
         # Deleta cast member
-        delete_response = api_client.delete(f'/api/cast-members/{created_cast_member_id}/')
+        delete_response = api_client.delete(f'/api/cast_members/{created_cast_member_id}/')
         assert delete_response.status_code == status.HTTP_204_NO_CONTENT
 
         # Verifica que cast member deletado não esta na lista
-        list_response = api_client.get('/api/cast-members/')
+        list_response = api_client.get('/api/cast_members/')
         assert list_response.data == {"data": []}

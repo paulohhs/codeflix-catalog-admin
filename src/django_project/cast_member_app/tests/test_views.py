@@ -32,7 +32,7 @@ class TestCreateAPI:
         self,
         cast_member_repository,
     ):
-        url = "/api/cast-members/"
+        url = "/api/cast_members/"
         data = {
             "name": "Actor Member",
             "type": "ACTOR",
@@ -49,7 +49,7 @@ class TestCreateAPI:
         assert saved_cast_member.type == CastMemberType.ACTOR
 
     def test_when_request_data_is_invalid_then_return_400(self):
-        url = "/api/cast-members/"
+        url = "/api/cast_members/"
         data = {
             "name": "",
             "type": "ACTOR",
@@ -66,7 +66,7 @@ class TestCreateAPI:
 @pytest.mark.django_db
 class TestListAPI:
     def test_when_does_not_exist_cast_member_return_empty_list(self):
-        url = "/api/cast-members/"
+        url = "/api/cast_members/"
 
         response = APIClient().get(url)
         assert response.status_code == status.HTTP_200_OK
@@ -80,7 +80,7 @@ class TestListAPI:
     ):
         cast_member_repository.save(actor_member)
         cast_member_repository.save(director_member)
-        url = "/api/cast-members/"
+        url = "/api/cast_members/"
 
         response = APIClient().get(url)
         assert response.status_code == status.HTTP_200_OK
@@ -103,7 +103,7 @@ class TestUpdateAPI:
     ) -> None:
         cast_member_repository.save(actor_member)
 
-        url = f"/api/cast-members/{str(actor_member.id)}/"
+        url = f"/api/cast_members/{str(actor_member.id)}/"
         data = {
             "name": "Member Updated",
             "type": "DIRECTOR",
@@ -119,7 +119,7 @@ class TestUpdateAPI:
         self,
         actor_member: CastMember,
     ) -> None:
-        url = f"/api/cast-members/{str(actor_member.id)}/"
+        url = f"/api/cast_members/{str(actor_member.id)}/"
         data = {
             "name": "",
             "type": "DIRECTOR",
@@ -136,7 +136,7 @@ class TestUpdateAPI:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_when_cast_member_does_not_exist_then_return_404(self) -> None:
-        url = f"/api/cast-members/{str(uuid.uuid4())}/"
+        url = f"/api/cast_members/{str(uuid.uuid4())}/"
         data = {
             "name": "Member Does Not Exist",
             "type": CastMemberType.DIRECTOR
@@ -149,13 +149,13 @@ class TestUpdateAPI:
 @pytest.mark.django_db
 class TestDeleteAPI:
     def test_when_cast_member_doesnt_exist_then_raise_404(self):
-        url = f"/api/cast-members/{uuid.uuid4()}/"
+        url = f"/api/cast_members/{uuid.uuid4()}/"
         response = APIClient().delete(url)
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_when_id_is_invalid_then_return_400(self):
-        url = f"/api/cast-members/1/"
+        url = f"/api/cast_members/1/"
         response = APIClient().delete(url)
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -168,7 +168,7 @@ class TestDeleteAPI:
         cast_member_repository.save(cast_member=actor_member)
         assert CastMemberORM.objects.count() == 1
 
-        url = f"/api/cast-members/{actor_member.id}/"
+        url = f"/api/cast_members/{actor_member.id}/"
         response = APIClient().delete(url)
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
