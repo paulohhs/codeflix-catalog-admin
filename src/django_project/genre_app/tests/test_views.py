@@ -60,6 +60,10 @@ def genre_repository() -> DjangoORMGenreRepository:
 
 @pytest.mark.django_db
 class TestListAPI:
+    @pytest.mark.parametrize(
+        "current_page",
+        [1, 2, 3]
+    )
     def test_list_genres_and_categories(
         self,
         genre_drama,
@@ -68,46 +72,46 @@ class TestListAPI:
         category_documentary,
         category_movie,
         category_repository,
+        current_page,
     ):
-        genre_repository.save(genre=genre_romance)
+        genre_novel = Genre(name="Novel", is_active=False)
+        genre_cartoon = Genre(name="Carton", is_active=False)
+        genre_comedy = Genre(name="Comedy", is_active=False)
         genre_repository.save(genre=genre_drama)
+        genre_repository.save(genre=genre_romance)
+        genre_repository.save(genre=genre_comedy)
+        genre_repository.save(genre=genre_novel)
+        genre_repository.save(genre=genre_cartoon)
 
-        # expected_response = {
-        #     "data": [
-        #         {
-        #             "id": str(genre_romance.id),
-        #             "name": genre_romance.name,
-        #             "is_active": genre_romance.is_active,
-        #             "categories": [
-        #                 str(category_movie.id),
-        #                 str(category_documentary.id),
-        #             ],
-        #         },
-        #         {
-        #             "id": str(genre_drama.id),
-        #             "name": genre_drama.name,
-        #             "is_active": genre_drama.is_active,
-        #             "categories": [],
-        #         }
-        #     ]
-        # }
+        expected_data_per_page = {
+            1: [genre_cartoon, genre_comedy],
+            2: [genre_drama, genre_novel],
+            3: [genre_romance]
+        }
 
-        url = "/api/genres/"
+        expected_response = {
+            "data": [
+                {
+                    "id": str(genre.id),
+                    "name": genre.name,
+                    "is_active": genre.is_active,
+                    "categories": [
+                        str(category) for category in genre.categories
+                    ] if len(genre.categories) > 0 else [],
+                } for genre in expected_data_per_page[current_page]
+            ],
+            "meta": {
+                "current_page": current_page,
+                "per_page": 2,
+                "total": 5,
+            }
+        }
+
+        url = f"/api/genres/?current_page={current_page}"
 
         response = APIClient().get(url)
         assert response.status_code == status.HTTP_200_OK
-        # assert response.data == expected_response
-
-        assert response.data["data"]
-        assert response.data["data"][0]["id"] == str(genre_drama.id)
-        assert response.data["data"][0]["name"] == genre_drama.name
-        assert response.data["data"][0]["is_active"] == genre_drama.is_active
-        assert set(response.data["data"][0]["categories"]) == set()
-
-        assert response.data["data"][1]["id"] == str(genre_romance.id)
-        assert response.data["data"][1]["name"] == genre_romance.name
-        assert response.data["data"][1]["is_active"] == genre_romance.is_active
-        assert len(response.data["data"][1]["categories"]) == 2
+        assert response.data == expected_response
 
 
 @pytest.mark.django_db
