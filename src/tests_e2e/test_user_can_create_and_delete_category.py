@@ -11,7 +11,10 @@ class TestCreateAndDeleteCategory:
 
         # Verifica que lista esta vazia
         list_response = api_client.get('/api/categories/')
-        assert list_response.data == {"data": []}
+        assert list_response.data == {
+            "data": [],
+            "meta": {'current_page': 1, 'per_page': 2, 'total': 0}
+        }
 
         # Criar uma categoria
         create_response = api_client.post(
@@ -35,7 +38,8 @@ class TestCreateAndDeleteCategory:
                     "description": "Movie description",
                     "is_active": True,
                 }
-            ]
+            ],
+            "meta": {'current_page': 1, 'per_page': 2, 'total': 1}
         }
 
         # Deleta categoria
@@ -44,4 +48,4 @@ class TestCreateAndDeleteCategory:
 
         # Verifica que categoria deletada não esta na lista
         list_response = api_client.get('/api/categories/')
-        assert list_response.data == {"data": []}
+        assert list_response.data == {"data": [], "meta": {'current_page': 1, 'per_page': 2, 'total': 0}}
