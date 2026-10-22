@@ -1,6 +1,4 @@
-from unittest.mock import create_autospec
-
-from src.core.category.domain.category_repository import CategoryRepository
+from src.core.category.application.usecases.list_category import ListOutputMeta
 from src.core.category.application.usecases.list_category import (
     CategoryOutput,
     ListCategory, 
@@ -20,7 +18,7 @@ class TestListCategory:
         response = use_case.execute(request=request)
 
         assert isinstance(response, ListCategoryResponse)
-        assert response == ListCategoryResponse(data=[])
+        assert response == ListCategoryResponse(data=[], meta=ListOutputMeta(current_page=1, per_page=2, total=0))
 
     def test_return_existing_categories(self):
         category_filme = Category(
@@ -52,5 +50,6 @@ class TestListCategory:
                     description=category_serie.description,
                     is_active=category_serie.is_active,
                 )
-            ]
+            ],
+            meta=ListOutputMeta(current_page=1, per_page=2, total=2)
         )
