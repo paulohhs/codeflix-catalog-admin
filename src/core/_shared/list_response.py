@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from typing import TypeVar, Generic
 
 
+T = TypeVar("T")
 DEFAULT_PAGINATION_SIZE = 2
 
 
@@ -11,9 +12,6 @@ class ListOutputMeta:
     current_page: int = 1
     per_page: int = DEFAULT_PAGINATION_SIZE
     total: int = 0
-
-
-T = TypeVar("T")
 
 
 @dataclass
