@@ -72,26 +72,73 @@ class TestListAPI:
         assert response.status_code == status.HTTP_200_OK
         assert response.data["data"] == []
 
+    @pytest.mark.parametrize(
+        "order_by, current_page",
+        [
+            ("name", 1),
+            ("name", 2),
+            ("type", 1),
+            ("type", 2),
+        ]
+    )
     def test_list_cast_members(
         self,
-        actor_member,
-        director_member,
         cast_member_repository,
+        order_by: str,
+        current_page: int,
     ):
-        cast_member_repository.save(actor_member)
-        cast_member_repository.save(director_member)
-        url = "/api/cast_members/"
+        member_1 = CastMember(
+            name="Member 1",
+            type=CastMemberType.DIRECTOR,
+        )
+        member_2 = CastMember(
+            name="Member 2",
+            type=CastMemberType.ACTOR,
+        )
+        member_3 = CastMember(
+            name="Member 3",
+            type=CastMemberType.DIRECTOR,
+        )
+        member_4 = CastMember(
+            name="Member 4",
+            type=CastMemberType.ACTOR,
+        )
+        cast_member_repository.save(member_1)
+        cast_member_repository.save(member_2)
+        cast_member_repository.save(member_3)
+        cast_member_repository.save(member_4)
 
+        if order_by == "name":
+            expected_data_per_page = {
+                1: [member_1, member_2],
+                2: [member_3, member_4],
+            }
+        else:
+            expected_data_per_page = {
+                1: [member_2, member_4],
+                2: [member_1, member_3],
+            }
+
+        expected_data = {
+            "data": [
+                {
+                    "id": str(cast_member.id),
+                    "name": cast_member.name,
+                    "type": cast_member.type,
+                } for cast_member in expected_data_per_page[current_page]
+            ],
+            "meta": {
+                "current_page": current_page,
+                "per_page": 2,
+                "total": 4,
+            }
+        }
+
+        url = f"/api/cast_members/?order_by={order_by}&current_page={current_page}"
         response = APIClient().get(url)
-        assert response.status_code == status.HTTP_200_OK
-        assert response.data["data"]
-        assert response.data["data"][0]["id"] == str(actor_member.id)
-        assert response.data["data"][0]["name"] == actor_member.name
-        assert response.data["data"][0]["type"] == actor_member.type
 
-        assert response.data["data"][1]["id"] == str(director_member.id)
-        assert response.data["data"][1]["name"] == director_member.name
-        assert response.data["data"][1]["type"] == director_member.type
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == expected_data
 
 
 @pytest.mark.django_db
