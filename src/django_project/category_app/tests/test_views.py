@@ -46,22 +46,86 @@ class TestListAPI:
         expected_data = {
             "data": [
                 {
-                    "id": str(category_movie.id),
-                    "name": category_movie.name,
-                    "description": category_movie.description,
-                    "is_active": category_movie.is_active,
-                }, 
-                {
                     "id": str(category_documentary.id),
                     "name": category_documentary.name,
                     "description": category_documentary.description,
                     "is_active": category_documentary.is_active,
                 },
-            ]
+                {
+                    "id": str(category_movie.id),
+                    "name": category_movie.name,
+                    "description": category_movie.description,
+                    "is_active": category_movie.is_active,
+                },
+            ],
+            "meta": {
+                "current_page": 1,
+                "per_page": 2,
+                "total": 2,
+            }
         }
 
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data["data"]) == 2
+        assert response.data == expected_data
+
+    @pytest.mark.parametrize(
+        "order_by, current_page",
+        [
+            ("name", 1),
+            ("name", 2),
+            ("description", 1),
+            ("description", 2),
+        ]
+    )
+    def test_list_categories_with_sorting_and_pagination(
+        self,
+        category_repository: DjangoORMCategoryRepository,
+        order_by: str,
+        current_page: int,
+    ):
+        category_a = Category(name="A", description="B")
+        category_repository.save(category_a)
+
+        category_b = Category(name="B", description="C")
+        category_repository.save(category_b)
+
+        category_c = Category(name="C", description="A")
+        category_repository.save(category_c)
+
+        if order_by == "name":
+            expected_data_per_page = {
+                1: [category_a, category_b],
+                2: [category_c],
+            }
+        else:
+            expected_data_per_page = {
+                1: [category_c, category_a],
+                2: [category_b],
+            }
+
+        expected_data = {
+            "data": [
+                {
+                    "id": str(category.id),
+                    "name": category.name,
+                    "description": category.description,
+                    "is_active": category.is_active,
+                }
+                for category in expected_data_per_page[current_page]
+            ],
+            "meta": {
+                "current_page": current_page,
+                "per_page": 2,
+                "total": 3,
+            }
+        }
+
+        url = f"/api/categories/?order_by={order_by}&current_page={current_page}"
+        response = APIClient().get(url)
+
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["data"]) == len(expected_data_per_page[current_page])
         assert response.data == expected_data
 
 
