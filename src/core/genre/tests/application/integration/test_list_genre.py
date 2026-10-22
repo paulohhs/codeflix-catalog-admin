@@ -6,6 +6,7 @@ from src.core.genre.application.use_cases.list_genre import (
 )
 from src.core.genre.domain.genre import Genre
 from src.core.genre.infra.in_memory_genre_repository import InMemoryGenreRepository
+from src.core._shared.application.list_response import ListOutputMeta
 
 
 class TestListGenre:
@@ -37,7 +38,12 @@ class TestListGenre:
                     is_active=genre.is_active,
                     categories=genre.categories,
                 )
-            ]
+            ],
+            meta=ListOutputMeta(
+                current_page=1,
+                per_page=2,
+                total=1,
+            )
         )
 
     def test_when_genre_doesnt_exist_return_empty_data(self):

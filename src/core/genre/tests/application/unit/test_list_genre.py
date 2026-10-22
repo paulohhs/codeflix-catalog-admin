@@ -7,6 +7,7 @@ from src.core.genre.application.use_cases.list_genre import (
 )
 from src.core.genre.domain.genre import Genre
 from src.core.genre.domain.genre_repository import GenreRepository
+from src.core._shared.application.list_response import ListOutputMeta
 
 
 class TestListGenre:
@@ -29,18 +30,23 @@ class TestListGenre:
         assert output == ListGenre.Output(
             data=[
                 GenreOutput(
-                    id=genre_terror.id,
-                    name=genre_terror.name,
-                    is_active=genre_terror.is_active,
-                    categories=genre_terror.categories,
-                ),
-                GenreOutput(
                     id=genre_comedy.id,
                     name=genre_comedy.name,
                     is_active=genre_comedy.is_active,
                     categories=genre_comedy.categories,
+                ),
+                GenreOutput(
+                    id=genre_terror.id,
+                    name=genre_terror.name,
+                    is_active=genre_terror.is_active,
+                    categories=genre_terror.categories,
                 )
-            ]
+            ],
+            meta = ListOutputMeta(
+                current_page=1,
+                per_page=2,
+                total=2,
+            )
         )
 
     def test_when_genre_doesnt_exist_return_empty_data(self):
