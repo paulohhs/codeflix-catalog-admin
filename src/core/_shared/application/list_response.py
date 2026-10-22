@@ -7,6 +7,12 @@ T = TypeVar("T")
 DEFAULT_PAGINATION_SIZE = 2
 
 
+@dataclass(kw_only=True)
+class ListInput:
+    order_by: str = "name"
+    current_page: int = 1
+
+
 @dataclass
 class ListOutputMeta:
     current_page: int = 1
