@@ -8,16 +8,15 @@ from src.core.cast_member.application.use_cases.exceptions import (
     InvalidCastMember,
 )
 from src.core.cast_member.application.use_cases.update_cast_member import UpdateCastMember
-from src.core.cast_member.domain.cast_member import CastMember
-from src.core.cast_member.infra.in_memory_cast_member_repository import InMemoryCastMemberRepository
 
 
 class TestUpdateGenre:
     def test_when_cast_member_doesnt_exist_then_raise_cast_member_not_found(
         self,
+        mock_im_cast_member_repository,
     ):
         use_case = UpdateCastMember(
-            repository=InMemoryCastMemberRepository(),
+            repository=mock_im_cast_member_repository,
         )
         input = UpdateCastMember.Input(
             id=uuid.uuid4(),
@@ -30,10 +29,13 @@ class TestUpdateGenre:
 
     def test_when_attributes_is_invalid_then_raise_invalid_genre(
         self,
+        mock_im_cast_member_repository_with_data,
     ):
-        cast_member = CastMember(name="Actor Member", type=CastMemberType.ACTOR)
-
-        mock_cast_member_repository = InMemoryCastMemberRepository(cast_members=[cast_member])
+        (
+            cast_member,
+            _,
+            mock_cast_member_repository
+        ) = mock_im_cast_member_repository_with_data
 
         use_case = UpdateCastMember(
             repository=mock_cast_member_repository,
@@ -56,9 +58,13 @@ class TestUpdateGenre:
 
     def test_attributes_is_valid_then_update_cast_member(
         self,
+        mock_im_cast_member_repository_with_data,
     ):
-        cast_member = CastMember(name="Member", type=CastMemberType.ACTOR)
-        mock_cast_member_repository = InMemoryCastMemberRepository(cast_members=[cast_member])
+        (
+            cast_member,
+            _,
+            mock_cast_member_repository
+        ) = mock_im_cast_member_repository_with_data
 
         use_case = UpdateCastMember(
             repository=mock_cast_member_repository,
@@ -70,8 +76,8 @@ class TestUpdateGenre:
             type=CastMemberType.DIRECTOR,
         )
 
-        assert cast_member.name == "Member"
-        assert cast_member.type == CastMemberType.ACTOR
+        assert cast_member.name != "Member updated"
+        assert cast_member.type != CastMemberType.DIRECTOR
 
         use_case.execute(input=input)
 

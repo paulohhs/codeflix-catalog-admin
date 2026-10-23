@@ -1,14 +1,8 @@
 from dataclasses import dataclass
-from typing import List
 from uuid import UUID
 
 from src.core.category.domain.category_repository import CategoryRepository
-from src.core.category.application.usecases.exceptions import CategoryNotFound
-
-
-@dataclass
-class ListCategoryRequest:
-    pass
+from src.core._shared.application.list_response import ListOutput, ListOutputMeta, ListInput
 
 
 @dataclass
@@ -19,20 +13,23 @@ class CategoryOutput:
     is_active: bool
 
 
-@dataclass
-class ListCategoryResponse:
-    data: List[CategoryOutput]
-
-
 class ListCategory:
     def __init__(self, repository: CategoryRepository):
         self.repository = repository
 
-    def execute(self, request: ListCategoryRequest) -> ListCategoryResponse:
+    @dataclass
+    class Input(ListInput):
+        pass
+
+    @dataclass
+    class Output(ListOutput[CategoryOutput]):
+        pass
+
+    def execute(self, input: Input) -> Output:
         categories = self.repository.list()
 
-        return ListCategoryResponse(
-            data=[
+        sorted_categories = sorted(
+            [
                 CategoryOutput(
                     id=category.id,
                     name=category.name,
@@ -40,5 +37,21 @@ class ListCategory:
                     is_active=category.is_active,
                 )
                 for category in categories
-            ]   
+            ],
+            key=lambda category: getattr(category, input.order_by)
+        )
+
+        categories_page = self.Output.paginate(
+            objects=sorted_categories,
+            per_page=input.per_page,
+            current_page=input.current_page,
+        )
+
+        return self.Output(
+            data=categories_page,
+            meta=ListOutputMeta(
+                current_page=input.current_page,
+                per_page=input.per_page,
+                total=len(sorted_categories)
+            )
         )

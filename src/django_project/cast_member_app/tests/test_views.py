@@ -6,24 +6,8 @@ from rest_framework.test import APIClient
 import pytest
 
 from src.core.cast_member.domain.cast_member import CastMemberType
-from src.core.cast_member.domain.cast_member import CastMember
 from src.django_project.cast_member_app.repository import DjangoORMCastMemberRepository
 from src.django_project.cast_member_app.models import CastMember as CastMemberORM
-
-
-@pytest.fixture
-def actor_member() -> CastMember:
-    return CastMember(name="Actor Member", type=CastMemberType.ACTOR)
-
-
-@pytest.fixture
-def director_member() -> CastMember:
-    return CastMember(name="Director Member", type=CastMemberType.DIRECTOR)
-
-
-@pytest.fixture
-def cast_member_repository() -> DjangoORMCastMemberRepository:
-    return DjangoORMCastMemberRepository()
 
 
 @pytest.mark.django_db
@@ -72,35 +56,73 @@ class TestListAPI:
         assert response.status_code == status.HTTP_200_OK
         assert response.data["data"] == []
 
+    @pytest.mark.parametrize(
+        "order_by, current_page",
+        [
+            ("name", 1),
+            ("name", 2),
+            ("type", 1),
+            ("type", 2),
+        ]
+    )
     def test_list_cast_members(
         self,
-        actor_member,
-        director_member,
+        mock_actor_member,
+        mock_director_member,
         cast_member_repository,
+        order_by: str,
+        current_page: int,
     ):
-        cast_member_repository.save(actor_member)
-        cast_member_repository.save(director_member)
-        url = "/api/cast_members/"
+        member_1 = mock_director_member(name="Member 1")
+        member_2 = mock_actor_member(name="Member 2")
+        member_3 = mock_director_member(name="Member 3")
+        member_4 = mock_actor_member(name="Member 4")
+        cast_member_repository.save(member_1)
+        cast_member_repository.save(member_2)
+        cast_member_repository.save(member_3)
+        cast_member_repository.save(member_4)
 
+        if order_by == "name":
+            expected_data_per_page = {
+                1: [member_1, member_2],
+                2: [member_3, member_4],
+            }
+        else:
+            expected_data_per_page = {
+                1: [member_2, member_4],
+                2: [member_1, member_3],
+            }
+
+        expected_data = {
+            "data": [
+                {
+                    "id": str(cast_member.id),
+                    "name": cast_member.name,
+                    "type": cast_member.type,
+                } for cast_member in expected_data_per_page[current_page]
+            ],
+            "meta": {
+                "current_page": current_page,
+                "per_page": 2,
+                "total": 4,
+            }
+        }
+
+        url = f"/api/cast_members/?order_by={order_by}&current_page={current_page}"
         response = APIClient().get(url)
-        assert response.status_code == status.HTTP_200_OK
-        assert response.data["data"]
-        assert response.data["data"][0]["id"] == str(actor_member.id)
-        assert response.data["data"][0]["name"] == actor_member.name
-        assert response.data["data"][0]["type"] == actor_member.type
 
-        assert response.data["data"][1]["id"] == str(director_member.id)
-        assert response.data["data"][1]["name"] == director_member.name
-        assert response.data["data"][1]["type"] == director_member.type
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == expected_data
 
 
 @pytest.mark.django_db
 class TestUpdateAPI:
     def test_when_request_data_is_valid_then_update_cast_member(
         self,
-        actor_member: CastMember,
+        mock_actor_member,
         cast_member_repository: DjangoORMCastMemberRepository,
     ) -> None:
+        actor_member = mock_actor_member()
         cast_member_repository.save(actor_member)
 
         url = f"/api/cast_members/{str(actor_member.id)}/"
@@ -117,8 +139,9 @@ class TestUpdateAPI:
 
     def test_when_request_data_is_invalid_then_return_400(
         self,
-        actor_member: CastMember,
+        mock_actor_member,
     ) -> None:
+        actor_member = mock_actor_member()
         url = f"/api/cast_members/{str(actor_member.id)}/"
         data = {
             "name": "",
@@ -162,9 +185,10 @@ class TestDeleteAPI:
 
     def test_delete_cast_member_from_repository(
         self,
-        actor_member,
+        mock_actor_member,
         cast_member_repository,
     ):
+        actor_member = mock_actor_member()
         cast_member_repository.save(cast_member=actor_member)
         assert CastMemberORM.objects.count() == 1
 

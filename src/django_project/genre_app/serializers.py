@@ -1,14 +1,15 @@
 from rest_framework import serializers
 
+from src.django_project.shared.serializers import ListResponseSerializer, IdSerializer
 
-class GenreOutputSerializer(serializers.Serializer):
-    id = serializers.UUIDField()
+
+class GenreOutputSerializer(IdSerializer):
     name = serializers.CharField(max_length=255)
     is_active = serializers.BooleanField()
     categories = serializers.ListField(child=serializers.UUIDField())
 
 
-class ListGenreOutputSerializer(serializers.Serializer):
+class ListGenreOutputSerializer(ListResponseSerializer):
     data = GenreOutputSerializer(many=True)
 
 
@@ -26,16 +27,15 @@ class CreateGenreInputSerializer(serializers.Serializer):
     categories = SetField(child=serializers.UUIDField())
 
 
-class CreateGenreOutputSerializer(serializers.Serializer):
-    id = serializers.UUIDField()
+class CreateGenreOutputSerializer(IdSerializer):
+    pass
 
 
-class UpdateGenreInputSerializer(serializers.Serializer):
-    id = serializers.UUIDField(required=True)
+class UpdateGenreInputSerializer(IdSerializer):
     name = serializers.CharField(required=True)
     is_active = serializers.BooleanField(required=True)
     categories = SetField(child=serializers.UUIDField(), required=True, allow_empty=True)
 
 
-class DeleteGenreInputSerializer(serializers.Serializer):
-    id = serializers.UUIDField()
+class DeleteGenreInputSerializer(IdSerializer):
+    pass

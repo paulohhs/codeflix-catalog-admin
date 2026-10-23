@@ -1,56 +1,52 @@
-from unittest.mock import create_autospec
-
-from src.core.category.domain.category_repository import CategoryRepository
+from src.core.category.application.usecases.list_category import ListOutputMeta
 from src.core.category.application.usecases.list_category import (
     CategoryOutput,
-    ListCategory, 
-    ListCategoryRequest, 
-    ListCategoryResponse
+    ListCategory,
 )
-from src.core.category.domain.category import Category
-from src.core.category.infra.in_memory_category_repository import InMemoryCategoryRepository
 
 
 class TestListCategory:
-    def test_return_empty_list(self):
-        repository = InMemoryCategoryRepository(categories=[])
+    def test_return_empty_list(
+        self,
+        mock_im_category_repository,
+    ):
+        use_case = ListCategory(repository=mock_im_category_repository)
+        response = use_case.execute(input=ListCategory.Input())
+
+        assert isinstance(response, ListCategory.Output)
+        assert response == ListCategory.Output(
+            data=[],
+            meta=ListOutputMeta(current_page=1, per_page=2, total=0)
+        )
+
+    def test_return_existing_categories(
+        self,
+        mock_im_category_repository_with_data,
+    ):
+        (
+            movie_category,
+            documentary_category,
+            repository,
+        ) = mock_im_category_repository_with_data
 
         use_case = ListCategory(repository=repository)
-        request = ListCategoryRequest()
-        response = use_case.execute(request=request)
+        response = use_case.execute(input=ListCategory.Input())
 
-        assert isinstance(response, ListCategoryResponse)
-        assert response == ListCategoryResponse(data=[])
-
-    def test_return_existing_categories(self):
-        category_filme = Category(
-            name="Filme", 
-            description="This is a test category",
-        )
-        category_serie = Category(
-            name="Série", 
-            description="This is a test category",
-        )
-        repository = InMemoryCategoryRepository(categories=[category_filme, category_serie])
-
-        use_case = ListCategory(repository=repository)
-        request = ListCategoryRequest()
-        response = use_case.execute(request=request)
-
-        assert isinstance(response, ListCategoryResponse)
-        assert response == ListCategoryResponse(
+        assert isinstance(response, ListCategory.Output)
+        assert response == ListCategory.Output(
             data=[
                 CategoryOutput(
-                    id=category_filme.id,
-                    name=category_filme.name,
-                    description=category_filme.description,
-                    is_active=category_filme.is_active,
+                    id=documentary_category.id,
+                    name=documentary_category.name,
+                    description=documentary_category.description,
+                    is_active=documentary_category.is_active,
                 ),
                 CategoryOutput(
-                    id=category_serie.id,
-                    name=category_serie.name,
-                    description=category_serie.description,
-                    is_active=category_serie.is_active,
+                    id=movie_category.id,
+                    name=movie_category.name,
+                    description=movie_category.description,
+                    is_active=movie_category.is_active,
                 )
-            ]
+            ],
+            meta=ListOutputMeta(current_page=1, per_page=2, total=2)
         )

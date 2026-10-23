@@ -9,43 +9,34 @@ from src.core.category.application.usecases.get_category import (
     GetCategoryResponse,
 )
 
-from src.core.category.domain.category import Category
-from src.core.category.infra.in_memory_category_repository import InMemoryCategoryRepository
-
 
 class TestGetCategory:
-    def test_get_category_by_id(self):
-        category_filme = Category(
-            name="Filme", 
-            description="This is a test category",
-        )
-        category_serie = Category(
-            name="Serie", 
-            description="This is a test category",
-        )
-        repository = InMemoryCategoryRepository(
-            categories=[category_filme, category_serie]
-        )
+    def test_get_category_by_id(
+        self,
+        mock_im_category_repository_with_data,
+    ):
+        (
+            movie_category,
+            documentary_category,
+            repository,
+        ) = mock_im_category_repository_with_data
 
         use_case = GetCategory(repository=repository)
-        request = GetCategoryRequest(id=category_filme.id)
+        request = GetCategoryRequest(id=movie_category.id)
         category_response = use_case.execute(request=request)
 
         assert category_response == GetCategoryResponse(
-            id=category_filme.id,
-            name="Filme",
-            description="This is a test category",
-            is_active=True,
+            id=movie_category.id,
+            name=movie_category.name,
+            description=movie_category.description,
+            is_active=movie_category.is_active,
         )
 
-    def test_when_category_does_not_exist_then_raise_exception(self):
-        category_filme = Category(
-            name="Filme", 
-            description="This is a test category",
-        )
-        repository = InMemoryCategoryRepository(
-            categories=[category_filme]
-        )
+    def test_when_category_does_not_exist_then_raise_exception(
+        self,
+        mock_im_category_repository_with_data,
+    ):
+        _, _, repository  = mock_im_category_repository_with_data
 
         use_case = GetCategory(repository=repository)
         request = GetCategoryRequest(id=uuid.uuid4())

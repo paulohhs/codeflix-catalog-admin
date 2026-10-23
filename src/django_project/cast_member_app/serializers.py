@@ -1,15 +1,15 @@
 from rest_framework import serializers
 
 from src.core.cast_member.domain.cast_member import CastMemberType
+from src.django_project.shared.serializers import ListResponseSerializer, IdSerializer
 
 
-class CastMemberOutputSerializer(serializers.Serializer):
-    id = serializers.UUIDField()
+class CastMemberOutputSerializer(IdSerializer):
     name = serializers.CharField(max_length=255)
     type = serializers.ChoiceField(choices=[type.value for type in CastMemberType])
 
 
-class ListCastMemberOutputSerializer(serializers.Serializer):
+class ListCastMemberOutputSerializer(ListResponseSerializer):
     data = CastMemberOutputSerializer(many=True)
 
 
@@ -33,15 +33,14 @@ class CreateCastMemberInputSerializer(serializers.Serializer):
     type = CastMemberTypeField()
 
 
-class CreateCastMemberOutputSerializer(serializers.Serializer):
-    id = serializers.UUIDField()
+class CreateCastMemberOutputSerializer(IdSerializer):
+    pass
 
 
-class UpdateCastMemberInputSerializer(serializers.Serializer):
-    id = serializers.UUIDField(required=True)
+class UpdateCastMemberInputSerializer(IdSerializer):
     name = serializers.CharField(required=True)
     type = CastMemberTypeField(required=True)
 
 
-class DeleteCastMemberInputSerializer(serializers.Serializer):
-    id = serializers.UUIDField()
+class DeleteCastMemberInputSerializer(IdSerializer):
+    pass

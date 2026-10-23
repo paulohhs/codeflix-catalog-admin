@@ -1,26 +1,21 @@
-from unittest.mock import create_autospec
 import uuid
 
 import pytest
 
-from src.core.cast_member.domain.cast_member import CastMemberType
 from src.core.cast_member.application.use_cases.delete_cast_member import DeleteCastMember
 from src.core.cast_member.application.use_cases.exceptions import CastMemberNotFound
-from src.core.cast_member.domain.cast_member import CastMember
-from src.core.cast_member.domain.cast_member_repository import CastMemberRepository
-
-
-@pytest.fixture
-def mock_cast_member_repository() -> CastMemberRepository:
-    return create_autospec(CastMemberRepository)
 
 
 class TestDeleteCastMember:
     def test_delete_cast_member_from_repository(
         self,
-        mock_cast_member_repository,
+        mock_cast_member_repository_with_data,
     ):
-        cast_member = CastMember(name="Test Member", type=CastMemberType.ACTOR)
+        (
+            cast_member,
+            _,
+            mock_cast_member_repository
+        ) = mock_cast_member_repository_with_data
         mock_cast_member_repository.get_by_id.return_value = cast_member
 
         use_case = DeleteCastMember(repository=mock_cast_member_repository)

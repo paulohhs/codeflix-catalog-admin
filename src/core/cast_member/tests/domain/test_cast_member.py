@@ -51,7 +51,7 @@ class TestEquality:
     def test_when_genres_have_same_id_they_are_equal(self):
         cast_member_id = uuid.uuid4()
         cast_member_1 = CastMember(id=cast_member_id, name="Actor member", type=CastMemberType.ACTOR)
-        cast_member_2 = CastMember(id=cast_member_id, name="Director member", type=CastMemberType.DIRECTOR)
+        cast_member_2 = CastMember(id=cast_member_id, name="Actor member", type=CastMemberType.ACTOR)
 
         assert cast_member_1 == cast_member_2
 

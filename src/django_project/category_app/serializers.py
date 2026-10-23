@@ -1,19 +1,20 @@
 from rest_framework import serializers
 
+from src.django_project.shared.serializers import ListResponseSerializer, IdSerializer
 
-class CategoryResponseSerializer(serializers.Serializer):
-    id = serializers.UUIDField()
+
+class CategoryResponseSerializer(IdSerializer):
     name = serializers.CharField(max_length=255)
     description = serializers.CharField()
     is_active = serializers.BooleanField()
 
 
-class ListCategoryResponseSerializer(serializers.Serializer):
+class ListCategoryResponseSerializer(ListResponseSerializer):
     data = CategoryResponseSerializer(many=True)
 
 
-class RetrieveCategoryRequestSerializer(serializers.Serializer):
-    id = serializers.UUIDField()
+class RetrieveCategoryRequestSerializer(IdSerializer):
+    pass
 
 
 class RetrieveCategoryResponseSerializer(serializers.Serializer):
@@ -26,16 +27,15 @@ class CreateCategoryRequestSerializer(serializers.Serializer):
     is_active = serializers.BooleanField(default=True)
 
 
-class CreateCategoryResponseSerializer(serializers.Serializer):
-    id = serializers.UUIDField()
+class CreateCategoryResponseSerializer(IdSerializer):
+    pass
 
 
-class UpdateCategoryRequestSerializer(serializers.Serializer):
-    id = serializers.UUIDField()
+class UpdateCategoryRequestSerializer(IdSerializer):
     name = serializers.CharField(max_length=255, allow_blank=False)
     description = serializers.CharField()
     is_active = serializers.BooleanField()
 
 
-class DeleteCategoryRequestSerializer(serializers.Serializer):
-    id = serializers.UUIDField()
+class DeleteCategoryRequestSerializer(IdSerializer):
+    pass

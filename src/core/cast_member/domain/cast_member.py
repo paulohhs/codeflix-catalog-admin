@@ -1,7 +1,7 @@
-from dataclasses import dataclass, field
-import uuid
+from dataclasses import dataclass
 from enum import StrEnum
-from uuid import UUID
+
+from src.core._shared.domain.entity import Entity
 
 
 class CastMemberType(StrEnum):
@@ -10,10 +10,9 @@ class CastMemberType(StrEnum):
 
 
 @dataclass
-class CastMember:
+class CastMember(Entity):
     name: str
     type: CastMemberType
-    id: UUID = field(default_factory=uuid.uuid4)
 
     def __post_init__(self):
         self.validate()
@@ -24,20 +23,18 @@ class CastMember:
     def __repr__(self):
         return f"<CastMember {self.name} ({self.id})>"
 
-    def __eq__(self, other):
-        if not isinstance(other, CastMember):
-            return False
-        return self.id == other.id
-
     def validate(self):
         if not self.name:
-            raise ValueError("name cannot be empty")
+            self.notification.add_error("name cannot be empty")
 
         if len(self.name) > 255:
-            raise ValueError("name must have less than 256 characters")
+            self.notification.add_error("name must have less than 256 characters")
 
         if not isinstance(self.type, CastMemberType):
-            raise ValueError("type must be a CastMemberType")
+            self.notification.add_error("type must be a CastMemberType")
+
+        if self.notification.has_errors:
+            raise ValueError(self.notification.messages)
 
     def change_name(self, name: str) -> None:
         self.name = name

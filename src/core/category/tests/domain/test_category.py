@@ -9,7 +9,7 @@ class TestCategory:
             Category()
 
     def test_name_must_have_less_than_256_characters(self):
-        with pytest.raises(ValueError, match="name must have less than 256 characters"):
+        with pytest.raises(ValueError, match="name cannot be longer than 255"):
             Category(name="a" * 256)
 
     def test_category_must_be_created_with_id_as_uuid(self):
@@ -47,6 +47,14 @@ class TestCategory:
         with pytest.raises(ValueError, match="name cannot be empty"):
             Category(name="")
 
+    def test_description_must_have_less_than_1024_characters(self):
+        with pytest.raises(ValueError, match="description cannot be longer than 1024"):
+            Category(name="Test Category", description="a" * 1025)
+
+    def test_name_and_description_are_invalid(self):
+        with pytest.raises(ValueError, match="name cannot be empty, description cannot be longer than 1024"):
+            Category(name="", description="a" * 1025)
+
     def test_category_str_representation(self):
         category = Category(name="Test Category", description="A test category", is_active=True)
 
@@ -76,7 +84,7 @@ class TestUpdateCategory:
     def test_update_category_with_invalid_name(self):
         category = Category(name="Old Name", description="Old Description")
 
-        with pytest.raises(ValueError, match="name must have less than 256 characters"):
+        with pytest.raises(ValueError, match="name cannot be longer than 255"):
             category.update_category(name="a" * 256, description="New Description")
 
 

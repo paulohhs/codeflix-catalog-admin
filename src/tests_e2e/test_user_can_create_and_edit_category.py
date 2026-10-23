@@ -11,7 +11,7 @@ class TestCreateAndEditCategory:
 
         # Verifica que lista esta vazia
         list_response = api_client.get('/api/categories/')
-        assert list_response.data == {"data": []}
+        assert list_response.data == {"data": [], "meta": {'current_page': 1, 'per_page': 2, 'total': 0}}
 
         # Criar uma categoria
         create_response = api_client.post(
@@ -35,7 +35,8 @@ class TestCreateAndEditCategory:
                     "description": "Movie description",
                     "is_active": True,
                 }
-            ]
+            ],
+            "meta": {'current_page': 1, 'per_page': 2, 'total': 1}
         }
 
         # Edita categoria criada
@@ -60,5 +61,6 @@ class TestCreateAndEditCategory:
                     "description": "Movie description edited",
                     "is_active": False,
                 }
-            ]
+            ],
+            "meta": {'current_page': 1, 'per_page': 2, 'total': 1}
         }

@@ -11,7 +11,14 @@ class TestUserCanCreateEditAndDeleteCastMember:
 
         # Verifica que lista esta vazia
         list_response = api_client.get('/api/cast_members/')
-        assert list_response.data == {"data": []}
+        assert list_response.data == {
+            "data": [],
+            "meta": {
+                "current_page": 1,
+                "per_page": 2,
+                "total": 0,
+            }
+        }
 
         # Criar um cast member
         create_response = api_client.post(
@@ -35,7 +42,12 @@ class TestUserCanCreateEditAndDeleteCastMember:
                     "name": "Actor Member",
                     "type": "ACTOR",
                 }
-            ]
+            ],
+            "meta": {
+                "current_page": 1,
+                "per_page": 2,
+                "total": 1,
+            }
         }
 
         # Atualiza cast member
@@ -51,9 +63,20 @@ class TestUserCanCreateEditAndDeleteCastMember:
         # Verifica que cast member foi atualizado
         list_response = api_client.get('/api/cast_members/')
         assert list_response.status_code == status.HTTP_200_OK
-        assert list_response.data["data"][0]["id"] == created_cast_member_id
-        assert list_response.data["data"][0]["name"] == "Member updated"
-        assert list_response.data["data"][0]["type"] == "DIRECTOR"
+        assert list_response.data == {
+            "data": [
+                {
+                    "id": created_cast_member_id,
+                    "name": "Member updated",
+                    "type": "DIRECTOR",
+                }
+            ],
+            "meta": {
+                "current_page": 1,
+                "per_page": 2,
+                "total": 1,
+            }
+        }
 
         # Deleta cast member
         delete_response = api_client.delete(f'/api/cast_members/{created_cast_member_id}/')
@@ -61,4 +84,11 @@ class TestUserCanCreateEditAndDeleteCastMember:
 
         # Verifica que cast member deletado não esta na lista
         list_response = api_client.get('/api/cast_members/')
-        assert list_response.data == {"data": []}
+        assert list_response.data == {
+            "data": [],
+            "meta": {
+                "current_page": 1,
+                "per_page": 2,
+                "total": 0,
+            }
+        }

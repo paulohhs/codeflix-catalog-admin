@@ -1,4 +1,3 @@
-from unittest.mock import create_autospec
 import uuid
 
 import pytest
@@ -9,13 +8,6 @@ from src.core.cast_member.application.use_cases.exceptions import (
     InvalidCastMember,
 )
 from src.core.cast_member.application.use_cases.update_cast_member import UpdateCastMember
-from src.core.cast_member.domain.cast_member import CastMember
-from src.core.cast_member.domain.cast_member_repository import CastMemberRepository
-
-
-@pytest.fixture
-def mock_cast_member_repository() -> CastMemberRepository:
-    return create_autospec(CastMemberRepository)
 
 
 class TestUpdateGenre:
@@ -39,9 +31,13 @@ class TestUpdateGenre:
 
     def test_when_attributes_is_invalid_then_raise_invalid_genre(
         self,
-        mock_cast_member_repository,
+        mock_cast_member_repository_with_data,
     ):
-        cast_member = CastMember(name="Actor Member", type=CastMemberType.ACTOR)
+        (
+            cast_member,
+            _,
+            mock_cast_member_repository
+        ) = mock_cast_member_repository_with_data
         mock_cast_member_repository.get_by_id.return_value = cast_member
 
         use_case = UpdateCastMember(
@@ -65,9 +61,13 @@ class TestUpdateGenre:
 
     def test_attributes_is_valid_then_update_cast_member(
         self,
-        mock_cast_member_repository,
+        mock_cast_member_repository_with_data,
     ):
-        cast_member = CastMember(name="Member", type=CastMemberType.ACTOR)
+        (
+            cast_member,
+            _,
+            mock_cast_member_repository
+        ) = mock_cast_member_repository_with_data
         mock_cast_member_repository.get_by_id.return_value = cast_member
 
         use_case = UpdateCastMember(
@@ -80,8 +80,8 @@ class TestUpdateGenre:
             type=CastMemberType.DIRECTOR,
         )
 
-        assert cast_member.name == "Member"
-        assert cast_member.type == CastMemberType.ACTOR
+        assert cast_member.name != "Member updated"
+        assert cast_member.type != CastMemberType.DIRECTOR
 
         use_case.execute(input=input)
 

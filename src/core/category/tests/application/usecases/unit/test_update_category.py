@@ -1,87 +1,85 @@
-from unittest.mock import create_autospec
-
-from src.core.category.domain.category_repository import CategoryRepository
-from src.core.category.application.usecases.update_category import UpdateCategory, UpdateCategoryRequest
-from src.core.category.domain.category import Category
+from src.core.category.application.usecases.update_category import (
+    UpdateCategory,
+    UpdateCategoryRequest,
+)
 
 
 class TestUpdateCategory:
-    def test_update_category_name(self):
-        category = Category(
-            name="Filme", 
-            description="This is a test category",
-        )
-        repository = create_autospec(CategoryRepository)
-        repository.get_by_id.return_value = category
+    def test_update_category_name(self, mock_category_repository_with_data):
+        (
+            movie_category,
+            _,
+            repository,
+        ) = mock_category_repository_with_data
+        repository.get_by_id.return_value = movie_category
 
         use_case = UpdateCategory(repository=repository)
         request = UpdateCategoryRequest(
-            id=category.id,
+            id=movie_category.id,
             name="Série"
         )
 
         use_case.execute(request=request)
 
-        assert category.name == "Série"
-        assert category.description == "This is a test category"
-        repository.update.assert_called_once_with(category)
+        assert movie_category.name == "Série"
+        assert movie_category.description == movie_category.description
+        repository.update.assert_called_once_with(movie_category)
 
-    def test_update_category_description(self):
-        category = Category(
-            name="Filme", 
-            description="This is a test category",
-        )
-        repository = create_autospec(CategoryRepository)
-        repository.get_by_id.return_value = category
+    def test_update_category_description(self, mock_category_repository_with_data):
+        (
+            movie_category,
+            _,
+            repository,
+        ) = mock_category_repository_with_data
+        repository.get_by_id.return_value = movie_category
 
         use_case = UpdateCategory(repository=repository)
         request = UpdateCategoryRequest(
-            id=category.id,
+            id=movie_category.id,
             description="Categoria para filmes"
         )
 
         use_case.execute(request=request)
 
-        assert category.name == "Filme"
-        assert category.description == "Categoria para filmes"
-        repository.update.assert_called_once_with(category)
+        assert movie_category.name == movie_category.name
+        assert movie_category.description == "Categoria para filmes"
+        repository.update.assert_called_once_with(movie_category)
 
-    def test_can_activate_category(self):
-        category = Category(
-            name="Filme", 
-            description="This is a test category",
-            is_active=False,
-        )
-        repository = create_autospec(CategoryRepository)
-        repository.get_by_id.return_value = category
+    def test_can_activate_category(self, mock_category_repository_with_data):
+        (
+            movie_category,
+            _,
+            repository,
+        ) = mock_category_repository_with_data
+        movie_category.is_active = False
+        repository.get_by_id.return_value = movie_category
 
         use_case = UpdateCategory(repository=repository)
         request = UpdateCategoryRequest(
-            id=category.id,
+            id=movie_category.id,
             is_active=True
         )
 
         use_case.execute(request=request)
 
-        assert category.is_active is True
-        repository.update.assert_called_once_with(category)
+        assert movie_category.is_active is True
+        repository.update.assert_called_once_with(movie_category)
 
-    def test_can_deactivate_category(self):
-        category = Category(
-            name="Filme", 
-            description="This is a test category",
-            is_active=True,
-        )
-        repository = create_autospec(CategoryRepository)
-        repository.get_by_id.return_value = category
+    def test_can_deactivate_category(self, mock_category_repository_with_data):
+        (
+            movie_category,
+            _,
+            repository,
+        ) = mock_category_repository_with_data
+        repository.get_by_id.return_value = movie_category
 
         use_case = UpdateCategory(repository=repository)
         request = UpdateCategoryRequest(
-            id=category.id,
+            id=movie_category.id,
             is_active=False
         )
 
         use_case.execute(request=request)
 
-        assert category.is_active is False
-        repository.update.assert_called_once_with(category)
+        assert movie_category.is_active is False
+        repository.update.assert_called_once_with(movie_category)
