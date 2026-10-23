@@ -8,37 +8,16 @@ from src.core.category.domain.category import Category
 from src.django_project.category_app.repository import DjangoORMCategoryRepository
 
 
-@pytest.fixture
-def category_movie() -> Category:
-    return Category(
-        name="Movie",
-        description="Movie description",
-    )
-
-
-@pytest.fixture
-def category_documentary() -> Category:
-    return Category(
-        name="Documentary",
-        description="Documentary description",
-    )
-
-
-@pytest.fixture
-def category_repository() -> DjangoORMCategoryRepository:
-    return DjangoORMCategoryRepository()
-
-
 @pytest.mark.django_db
 class TestListAPI:
     def test_list_categories(
         self,
-        category_movie: Category,
-        category_documentary: Category,
+        mock_movie_category: Category,
+        mock_documentary_category: Category,
         category_repository: DjangoORMCategoryRepository,
     ):
-        category_repository.save(category_movie)
-        category_repository.save(category_documentary)
+        category_repository.save(mock_movie_category)
+        category_repository.save(mock_documentary_category)
 
         url = "/api/categories/"
         response = APIClient().get(url)
@@ -46,16 +25,16 @@ class TestListAPI:
         expected_data = {
             "data": [
                 {
-                    "id": str(category_documentary.id),
-                    "name": category_documentary.name,
-                    "description": category_documentary.description,
-                    "is_active": category_documentary.is_active,
+                    "id": str(mock_documentary_category.id),
+                    "name": mock_documentary_category.name,
+                    "description": mock_documentary_category.description,
+                    "is_active": mock_documentary_category.is_active,
                 },
                 {
-                    "id": str(category_movie.id),
-                    "name": category_movie.name,
-                    "description": category_movie.description,
-                    "is_active": category_movie.is_active,
+                    "id": str(mock_movie_category.id),
+                    "name": mock_movie_category.name,
+                    "description": mock_movie_category.description,
+                    "is_active": mock_movie_category.is_active,
                 },
             ],
             "meta": {
@@ -81,16 +60,17 @@ class TestListAPI:
     def test_list_categories_with_sorting_and_pagination(
         self,
         category_repository: DjangoORMCategoryRepository,
+        mock_category: callable,
         order_by: str,
         current_page: int,
     ):
-        category_a = Category(name="A", description="B")
+        category_a = mock_category(name="A", description="B")
         category_repository.save(category_a)
 
-        category_b = Category(name="B", description="C")
+        category_b = mock_category(name="B", description="C")
         category_repository.save(category_b)
 
-        category_c = Category(name="C", description="A")
+        category_c = mock_category(name="C", description="A")
         category_repository.save(category_c)
 
         if order_by == "name":
@@ -139,22 +119,22 @@ class TestRetrieveAPI:
 
     def test_return_category_when_exists(
         self,
-        category_movie: Category,
-        category_documentary: Category,
+        mock_movie_category: Category,
+        mock_documentary_category: Category,
         category_repository: DjangoORMCategoryRepository,
     ):
-        category_repository.save(category_movie)
-        category_repository.save(category_documentary)
+        category_repository.save(mock_movie_category)
+        category_repository.save(mock_documentary_category)
 
-        url = f"/api/categories/{category_documentary.id}/"
+        url = f"/api/categories/{mock_documentary_category.id}/"
         response = APIClient().get(url)
 
         expected_data = {
             "data": {
-                "id": str(category_documentary.id),
-                "name": category_documentary.name,
-                "description": category_documentary.description,
-                "is_active": category_documentary.is_active,
+                "id": str(mock_documentary_category.id),
+                "name": mock_documentary_category.name,
+                "description": mock_documentary_category.description,
+                "is_active": mock_documentary_category.is_active,
             }
         }
 
@@ -227,12 +207,12 @@ class TestUpdateAPI:
 
     def test_when_payload_is_valid_update_category_and_return_204(
         self,
-        category_movie: Category,
+        mock_movie_category: Category,
         category_repository: DjangoORMCategoryRepository,
     ):
-        category_repository.save(category_movie)
+        category_repository.save(mock_movie_category)
         
-        url = f'/api/categories/{category_movie.id}/'        
+        url = f'/api/categories/{mock_movie_category.id}/'
         response = APIClient().put(
             url,
             data={
@@ -243,7 +223,7 @@ class TestUpdateAPI:
         )
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
-        updated_category = category_repository.get_by_id(category_movie.id)
+        updated_category = category_repository.get_by_id(mock_movie_category.id)
 
         assert updated_category.name == "Docs"
         assert updated_category.description == "Docs description"
@@ -278,12 +258,12 @@ class TestDeleteAPI:
 
     def test_when_category_does_exist_then_delete_and_return_204(
         self,
-        category_movie: Category,
+        mock_movie_category: Category,
         category_repository: DjangoORMCategoryRepository,
     ):
-        category_repository.save(category_movie)
+        category_repository.save(mock_movie_category)
 
-        url = f"/api/categories/{category_movie.id}/"
+        url = f"/api/categories/{mock_movie_category.id}/"
         response = APIClient().delete(url)
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
@@ -316,12 +296,12 @@ class TestPartialUpdateAPI:
 
     def test_update_category_name_and_return_204(
         self,
-        category_movie: Category,
+        mock_movie_category: Category,
         category_repository: DjangoORMCategoryRepository,
     ):
-        category_repository.save(category_movie)
+        category_repository.save(mock_movie_category)
         
-        url = f'/api/categories/{category_movie.id}/'        
+        url = f'/api/categories/{mock_movie_category.id}/'
         response = APIClient().patch(
             url,
             data={
@@ -330,25 +310,25 @@ class TestPartialUpdateAPI:
         )
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
-        updated_category = category_repository.get_by_id(category_movie.id)
+        updated_category = category_repository.get_by_id(mock_movie_category.id)
 
-        assert updated_category.name != category_movie.name
+        assert updated_category.name != mock_movie_category.name
         assert updated_category.name == "Docs"
 
-        assert updated_category.description == category_movie.description
+        assert updated_category.description == mock_movie_category.description
         assert updated_category.description == "Movie description"
 
-        assert updated_category.is_active == category_movie.is_active
+        assert updated_category.is_active == mock_movie_category.is_active
         assert updated_category.is_active is True
 
     def test_update_category_description_and_return_204(
         self,
-        category_movie: Category,
+        mock_movie_category: Category,
         category_repository: DjangoORMCategoryRepository,
     ):
-        category_repository.save(category_movie)
+        category_repository.save(mock_movie_category)
         
-        url = f'/api/categories/{category_movie.id}/'        
+        url = f'/api/categories/{mock_movie_category.id}/'
         response = APIClient().patch(
             url,
             data={
@@ -357,26 +337,26 @@ class TestPartialUpdateAPI:
         )
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
-        updated_category = category_repository.get_by_id(category_movie.id)
+        updated_category = category_repository.get_by_id(mock_movie_category.id)
 
-        assert updated_category.name == category_movie.name
+        assert updated_category.name == mock_movie_category.name
         assert updated_category.name == "Movie"
 
-        assert updated_category.description != category_movie.description
+        assert updated_category.description != mock_movie_category.description
         assert updated_category.description == "Docs description"
 
-        assert updated_category.is_active == category_movie.is_active
+        assert updated_category.is_active == mock_movie_category.is_active
         assert updated_category.is_active is True
 
     def test_activate_category_and_return_204(
         self,
-        category_movie: Category,
+        mock_movie_category: Category,
         category_repository: DjangoORMCategoryRepository,
     ):
-        category_movie.is_active = False
-        category_repository.save(category_movie)
+        mock_movie_category.is_active = False
+        category_repository.save(mock_movie_category)
         
-        url = f'/api/categories/{category_movie.id}/'        
+        url = f'/api/categories/{mock_movie_category.id}/'
         response = APIClient().patch(
             url,
             data={
@@ -385,26 +365,26 @@ class TestPartialUpdateAPI:
         )
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
-        updated_category = category_repository.get_by_id(category_movie.id)
+        updated_category = category_repository.get_by_id(mock_movie_category.id)
 
-        assert updated_category.name == category_movie.name
+        assert updated_category.name == mock_movie_category.name
         assert updated_category.name == "Movie"
 
-        assert updated_category.description == category_movie.description
+        assert updated_category.description == mock_movie_category.description
         assert updated_category.description == "Movie description"
 
-        assert updated_category.is_active != category_movie.is_active
+        assert updated_category.is_active != mock_movie_category.is_active
         assert updated_category.is_active is True
 
     def test_deactivate_category_and_return_204(
         self,
-        category_movie: Category,
+        mock_movie_category: Category,
         category_repository: DjangoORMCategoryRepository,
     ):
-        assert category_movie.is_active is True
-        category_repository.save(category_movie)
+        assert mock_movie_category.is_active is True
+        category_repository.save(mock_movie_category)
         
-        url = f'/api/categories/{category_movie.id}/'        
+        url = f'/api/categories/{mock_movie_category.id}/'
         response = APIClient().patch(
             url,
             data={
@@ -413,13 +393,13 @@ class TestPartialUpdateAPI:
         )
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
-        updated_category = category_repository.get_by_id(category_movie.id)
+        updated_category = category_repository.get_by_id(mock_movie_category.id)
 
-        assert updated_category.name == category_movie.name
+        assert updated_category.name == mock_movie_category.name
         assert updated_category.name == "Movie"
 
-        assert updated_category.description == category_movie.description
+        assert updated_category.description == mock_movie_category.description
         assert updated_category.description == "Movie description"
 
-        assert updated_category.is_active != category_movie.is_active
+        assert updated_category.is_active != mock_movie_category.is_active
         assert updated_category.is_active is False

@@ -3,22 +3,22 @@ import uuid
 import pytest
 
 from src.core.category.domain.category import Category
-from src.django_project.category_app.repository import DjangoORMCategoryRepository
 from src.django_project.category_app.models import Category as CategoryModel
 
 
 @pytest.mark.django_db
 class TestSave:
-    def test_save_category_in_database(self):
+    def test_save_category_in_database(
+        self,
+        category_repository,
+    ):
         category = Category(
             name="Filme",
             description="Categoria de filmes"
         )
-
-        repository = DjangoORMCategoryRepository()
         assert CategoryModel.objects.count() == 0
 
-        repository.save(category=category)
+        category_repository.save(category=category)
         assert CategoryModel.objects.count() == 1
 
         category_db = CategoryModel.objects.get()
@@ -30,15 +30,18 @@ class TestSave:
 
 @pytest.mark.django_db
 class TestGet:
-    def test_get_by_id_return_none_when_not_existing_category(self):
-        repository = DjangoORMCategoryRepository()
-        
-        category_db = repository.get_by_id(id=uuid.uuid4())
+    def test_get_by_id_return_none_when_not_existing_category(
+        self,
+        category_repository,
+    ):
+        category_db = category_repository.get_by_id(id=uuid.uuid4())
         assert category_db is None
 
-    def test_get_by_id(self):
+    def test_get_by_id(
+        self,
+        category_repository,
+    ):
         category_id = uuid.uuid4()
-        repository = DjangoORMCategoryRepository()
 
         dados_category = {
             "id": category_id,
@@ -51,7 +54,7 @@ class TestGet:
         )
         assert CategoryModel.objects.count() == 1
 
-        category_db = repository.get_by_id(id=category_id)
+        category_db = category_repository.get_by_id(id=category_id)
         assert category_db.id == category_id
         assert category_db.name == dados_category["name"]
         assert category_db.description == dados_category["description"]
@@ -60,9 +63,11 @@ class TestGet:
 
 @pytest.mark.django_db
 class TestDelete:
-    def test_delete(self):
+    def test_delete(
+        self,
+        category_repository,
+    ):
         category_id = uuid.uuid4()
-        repository = DjangoORMCategoryRepository()
 
         dados_category = {
             "id": category_id,
@@ -75,22 +80,25 @@ class TestDelete:
         )
         assert CategoryModel.objects.count() == 1
 
-        repository.delete(id=category_id)
+        category_repository.delete(id=category_id)
         assert CategoryModel.objects.count() == 0
 
 
 @pytest.mark.django_db
 class TestList:
-    def test_return_empty_list_when_no_categories(self):
-        repository = DjangoORMCategoryRepository()
-
-        categories_db = repository.list()
+    def test_return_empty_list_when_no_categories(
+        self,
+        category_repository,
+    ):
+        categories_db = category_repository.list()
         assert categories_db == []
 
-    def test_list(self):
+    def test_list(
+        self,
+        category_repository,
+    ):
         category_id_filme = uuid.uuid4()
         category_id_serie = uuid.uuid4()
-        repository = DjangoORMCategoryRepository()
 
         dados_category_filme = {
             "id": category_id_filme,
@@ -113,7 +121,7 @@ class TestList:
         )
         assert CategoryModel.objects.count() == 2
 
-        categories_db = repository.list()
+        categories_db = category_repository.list()
         assert len(categories_db) == 2
         assert categories_db == [
             Category(
@@ -133,9 +141,11 @@ class TestList:
 
 @pytest.mark.django_db
 class TestUpdate:
-    def test_update(self):
+    def test_update(
+        self,
+        category_repository,
+    ):
         category_id = uuid.uuid4()
-        repository = DjangoORMCategoryRepository()
 
         CategoryModel.objects.create(
             id=category_id,
@@ -151,7 +161,7 @@ class TestUpdate:
             description="Categoria de séries",
             is_active=True,
         )
-        repository.update(category=category_to_update)
+        category_repository.update(category=category_to_update)
         assert CategoryModel.objects.count() == 1
 
         category_db = CategoryModel.objects.get(id=category_id)

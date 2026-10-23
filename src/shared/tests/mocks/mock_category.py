@@ -2,17 +2,23 @@ from unittest.mock import create_autospec
 
 import pytest
 
-from src.core.category.infra.in_memory_category_repository import InMemoryCategoryRepository
 from src.core.category.domain.category import Category
 from src.core.category.domain.category_repository import CategoryRepository
+from src.core.category.infra.in_memory_category_repository import InMemoryCategoryRepository
+from src.django_project.category_app.repository import DjangoORMCategoryRepository
 
 
 @pytest.fixture(scope="function")
 def mock_category() -> callable:
-    def make_mock(name: str, description: str = "") -> Category:
+    def make_mock(
+        name: str,
+        description: str = "",
+        is_active: bool = True
+    ) -> Category:
         return Category(
             name=name,
             description=description,
+            is_active=is_active,
         )
 
     yield make_mock
@@ -81,3 +87,19 @@ def mock_im_category_repository_with_data(
     )
 
     return mock_movie_category, mock_documentary_category, repository
+
+
+@pytest.fixture
+def category_repository() -> DjangoORMCategoryRepository:
+    return DjangoORMCategoryRepository()
+
+
+@pytest.fixture
+def category_repository_with_data(
+    mock_movie_category,
+    mock_documentary_category,
+) -> DjangoORMCategoryRepository:
+    repository = DjangoORMCategoryRepository()
+    repository.save(category=mock_movie_category)
+    repository.save(category=mock_documentary_category)
+    return repository

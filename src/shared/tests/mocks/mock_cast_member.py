@@ -2,7 +2,8 @@ from unittest.mock import create_autospec
 
 import pytest
 
-from core.cast_member.domain.cast_member_repository import CastMemberRepository
+from src.core.cast_member.domain.cast_member_repository import CastMemberRepository
+from src.django_project.cast_member_app.repository import DjangoORMCastMemberRepository
 from src.core.cast_member.infra.in_memory_cast_member_repository import InMemoryCastMemberRepository
 from src.core.cast_member.domain.cast_member import (
     CastMember,
@@ -71,3 +72,8 @@ def mock_im_cast_member_repository_with_data(
     )
 
     return actor_member, director_member, repository
+
+
+@pytest.fixture
+def cast_member_repository() -> DjangoORMCastMemberRepository:
+    return DjangoORMCastMemberRepository()

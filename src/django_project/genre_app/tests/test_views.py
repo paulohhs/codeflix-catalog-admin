@@ -5,57 +5,8 @@ from rest_framework.test import APIClient
 
 import pytest
 
-from src.core.category.domain.category import Category
-from src.core.genre.domain.genre import Genre
-from src.django_project.category_app.repository import DjangoORMCategoryRepository
-from src.django_project.genre_app.repository import DjangoORMGenreRepository
+from shared.tests.mocks.mock_category import mock_documentary_category, mock_movie_category
 from src.django_project.genre_app.models import Genre as GenreORM
-
-
-@pytest.fixture
-def category_movie():
-    return Category(
-        name="Movie",
-        description="Movie description",
-    )
-
-@pytest.fixture
-def category_documentary():
-    return Category(
-        name="Documentary",
-        description="Documentary description",
-    )
-
-
-@pytest.fixture
-def category_repository(category_documentary, category_movie) -> DjangoORMCategoryRepository:
-    repo = DjangoORMCategoryRepository()
-    repo.save(category=category_movie)
-    repo.save(category=category_documentary)
-
-    return repo
-
-
-@pytest.fixture
-def genre_romance(category_documentary, category_movie) -> Genre:
-    return Genre(
-        name="Romance",
-        is_active=True,
-        categories={category_movie.id, category_documentary.id}
-    )
-
-
-@pytest.fixture
-def genre_drama() -> Genre:
-    return Genre(
-        name="Drama",
-        is_active=True,
-        categories=set()
-    )
-
-@pytest.fixture
-def genre_repository() -> DjangoORMGenreRepository:
-    return DjangoORMGenreRepository()
 
 
 @pytest.mark.django_db
@@ -66,26 +17,25 @@ class TestListAPI:
     )
     def test_list_genres_and_categories(
         self,
-        genre_drama,
-        genre_romance,
+        mock_genre,
+        mock_drama_genre,
+        mock_comedy_genre,
         genre_repository,
-        category_documentary,
-        category_movie,
-        category_repository,
+        category_repository_with_data,
         current_page,
     ):
-        genre_novel = Genre(name="Novel", is_active=False)
-        genre_cartoon = Genre(name="Carton", is_active=False)
-        genre_comedy = Genre(name="Comedy", is_active=False)
-        genre_repository.save(genre=genre_drama)
+        genre_novel = mock_genre(name="Novel", is_active=False)
+        genre_cartoon = mock_genre(name="Carton", is_active=False)
+        genre_romance = mock_genre(name="Romance", is_active=False)
+        genre_repository.save(genre=mock_drama_genre)
         genre_repository.save(genre=genre_romance)
-        genre_repository.save(genre=genre_comedy)
+        genre_repository.save(genre=mock_comedy_genre)
         genre_repository.save(genre=genre_novel)
         genre_repository.save(genre=genre_cartoon)
 
         expected_data_per_page = {
-            1: [genre_cartoon, genre_comedy],
-            2: [genre_drama, genre_novel],
+            1: [genre_cartoon, mock_comedy_genre],
+            2: [mock_drama_genre, genre_novel],
             3: [genre_romance]
         }
 
@@ -118,17 +68,17 @@ class TestListAPI:
 class TestCreateAPI:
     def test_create_genre_with_associated_categories(
         self,
-        category_movie,
-        category_documentary,
-        category_repository,
-        genre_repository: DjangoORMGenreRepository,
+        mock_movie_category,
+        mock_documentary_category,
+        category_repository_with_data,
+        genre_repository,
     ):
         url = "/api/genres/"
         data = {
             "name": "Drama",
             "categories": [
-                str(category_movie.id),
-                str(category_documentary.id),
+                str(mock_movie_category.id),
+                str(mock_documentary_category.id),
             ],
         }
 
@@ -141,8 +91,8 @@ class TestCreateAPI:
         saved_genre = genre_repository.get_by_id(id=created_genre_id)
         assert saved_genre.name == "Drama"
         assert saved_genre.categories == {
-            category_movie.id,
-            category_documentary.id,
+            mock_movie_category.id,
+            mock_documentary_category.id,
         }
 
 
@@ -162,17 +112,17 @@ class TestDeleteAPI:
 
     def test_delete_genre_from_repository(
         self,
-        genre_drama,
+        mock_drama_genre,
         genre_repository,
     ):
-        genre_repository.save(genre=genre_drama)
+        genre_repository.save(genre=mock_drama_genre)
         assert GenreORM.objects.count() == 1
 
-        url = f"/api/genres/{genre_drama.id}/"
+        url = f"/api/genres/{mock_drama_genre.id}/"
         response = APIClient().delete(url)
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
-        assert genre_repository.get_by_id(genre_drama.id) is None
+        assert genre_repository.get_by_id(mock_drama_genre.id) is None
         assert GenreORM.objects.count() == 0
 
 
@@ -180,33 +130,32 @@ class TestDeleteAPI:
 class TestUpdateAPI:
     def test_when_request_data_is_valid_then_update_genre(
         self,
-        category_repository: DjangoORMCategoryRepository,
-        category_movie: Category,
-        category_documentary: Category,
-        genre_repository: DjangoORMGenreRepository,
-        genre_romance: Genre,
+        mock_documentary_category,
+        mock_drama_genre,
+        genre_repository,
+        category_repository_with_data,
     ) -> None:
-        genre_repository.save(genre_romance)
+        genre_repository.save(mock_drama_genre)
 
-        url = f"/api/genres/{str(genre_romance.id)}/"
+        url = f"/api/genres/{str(mock_drama_genre.id)}/"
         data = {
             "name": "Drama",
             "is_active": True,
-            "categories": [category_documentary.id],
+            "categories": [mock_documentary_category.id],
         }
         response = APIClient().put(url, data=data)
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
-        updated_genre = genre_repository.get_by_id(genre_romance.id)
+        updated_genre = genre_repository.get_by_id(mock_drama_genre.id)
         assert updated_genre.name == "Drama"
         assert updated_genre.is_active is True
-        assert updated_genre.categories == {category_documentary.id}
+        assert updated_genre.categories == {mock_documentary_category.id}
 
     def test_when_request_data_is_invalid_then_return_400(
         self,
-        genre_drama: Genre,
+        mock_drama_genre,
     ) -> None:
-        url = f"/api/genres/{str(genre_drama.id)}/"
+        url = f"/api/genres/{str(mock_drama_genre.id)}/"
         data = {
             "name": "",
             "is_active": True,
@@ -219,15 +168,13 @@ class TestUpdateAPI:
 
     def test_when_related_categories_do_not_exist_then_return_400(
         self,
-        category_repository: DjangoORMCategoryRepository,
-        category_movie: Category,
-        category_documentary: Category,
-        genre_repository: DjangoORMGenreRepository,
-        genre_romance: Genre,
+        mock_drama_genre,
+        genre_repository,
+        category_repository_with_data,
     ) -> None:
-        genre_repository.save(genre_romance)
+        genre_repository.save(mock_drama_genre)
 
-        url = f"/api/genres/{str(genre_romance.id)}/"
+        url = f"/api/genres/{str(mock_drama_genre.id)}/"
         data = {
             "name": "Romance",
             "is_active": True,

@@ -3,6 +3,8 @@ from uuid import UUID
 import pytest
 
 from unittest.mock import create_autospec
+
+from src.django_project.genre_app.repository import DjangoORMGenreRepository
 from src.core.genre.domain.genre_repository import GenreRepository
 from src.core.genre.domain.genre import Genre
 from src.core.genre.infra.in_memory_genre_repository import InMemoryGenreRepository
@@ -16,6 +18,23 @@ def mock_comedy_genre() -> Genre:
 @pytest.fixture
 def mock_drama_genre() -> Genre:
     return Genre(name="Drama")
+
+
+@pytest.fixture
+def mock_genre() -> callable:
+    def make_mock(
+        name: str = "Test Genre",
+        is_active: bool = True,
+        categories: set[UUID] | None = None,
+    ) -> Genre:
+        return Genre(
+            name=name,
+            is_active=is_active,
+            categories=categories
+            if categories is not None else set()
+        )
+
+    yield make_mock
 
 
 @pytest.fixture
@@ -61,3 +80,8 @@ def mock_im_genre_repository_with_data(
     )
 
     return mock_comedy_genre, mock_drama_genre, repository
+
+
+@pytest.fixture
+def genre_repository() -> DjangoORMGenreRepository:
+    return DjangoORMGenreRepository()
