@@ -1,6 +1,4 @@
-from unittest.mock import create_autospec
 import uuid
-
 import pytest
 
 from src.core.genre.application.use_cases.list_genre import (
@@ -8,14 +6,14 @@ from src.core.genre.application.use_cases.list_genre import (
     GenreOutput,
 )
 from src.core.genre.domain.genre import Genre
-from src.core.genre.domain.genre_repository import GenreRepository
 from src.core._shared.application.list_response import ListOutputMeta
 
 
 class TestListGenre:
-    def test_list_generes_with_associated_categories(self):
-        genre_repository = create_autospec(GenreRepository)
-
+    def test_list_generes_with_associated_categories(
+        self,
+        mock_genre_repository,
+    ):
         category_id_1 = uuid.uuid4()
         category_id_2 = uuid.uuid4()
 
@@ -24,9 +22,9 @@ class TestListGenre:
             categories={category_id_1, category_id_2}
         )
         genre_comedy = Genre(name="Comedy")
-        genre_repository.list.return_value = [genre_terror, genre_comedy]
+        mock_genre_repository.list.return_value = [genre_terror, genre_comedy]
 
-        use_case = ListGenre(repository=genre_repository)
+        use_case = ListGenre(repository=mock_genre_repository)
         output = use_case.execute(input=ListGenre.Input())
 
         assert output == ListGenre.Output(
@@ -58,16 +56,15 @@ class TestListGenre:
     def test_genres_listed_are_sorted_and_paginated(
         self,
         current_page: int,
+        mock_genre_repository,
     ):
-        genre_repository = create_autospec(GenreRepository)
-
         genre_terror = Genre(name="Terror", is_active=True)
         genre_comedy = Genre(name="Comedy", is_active=False)
         genre_drama = Genre(name="Drama", is_active=True)
         genre_novel = Genre(name="Novel", is_active=False)
         genre_career = Genre(name="Career", is_active=True)
 
-        genre_repository.list.return_value = [
+        mock_genre_repository.list.return_value = [
             genre_terror,
             genre_comedy,
             genre_drama,
@@ -91,7 +88,7 @@ class TestListGenre:
             for genre in expected_data_per_page[current_page]
         ]
 
-        use_case = ListGenre(repository=genre_repository)
+        use_case = ListGenre(repository=mock_genre_repository)
         output = use_case.execute(input=ListGenre.Input(
             current_page=current_page,
         ))
@@ -105,11 +102,13 @@ class TestListGenre:
             )
         )
 
-    def test_when_genre_doesnt_exist_return_empty_data(self):
-        genre_repository = create_autospec(GenreRepository)
-        genre_repository.list.return_value = []
+    def test_when_genre_doesnt_exist_return_empty_data(
+        self,
+        mock_genre_repository,
+    ):
+        mock_genre_repository.list.return_value = []
 
-        use_case = ListGenre(repository=genre_repository)
+        use_case = ListGenre(repository=mock_genre_repository)
         output = use_case.execute(input=ListGenre.Input())
 
         assert len(output.data) == 0
