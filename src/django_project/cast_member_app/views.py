@@ -39,7 +39,10 @@ class CastMemberViewSet(viewsets.ViewSet):
         output: ListCastMember.Output = use_case.execute(input=input)
         serializer = ListCastMemberOutputSerializer(output)
 
-        return Response(status=HTTP_200_OK, data=serializer.data)
+        return Response(
+            status=HTTP_200_OK,
+            data=serializer.data
+        )
 
     def create(self, request: Request) -> Response:
         serializer = CreateCastMemberInputSerializer(data=request.data)

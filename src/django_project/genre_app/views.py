@@ -32,7 +32,6 @@ from src.django_project.genre_app.serializers import (
 )
 
 
-
 class GenreViewSet(viewsets.ViewSet):
     def list(self, request: Request) -> Response:
         input = ListGenre.Input(

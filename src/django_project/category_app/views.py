@@ -8,8 +8,10 @@ from rest_framework.status import (
     HTTP_201_CREATED,
     HTTP_204_NO_CONTENT,
     HTTP_404_NOT_FOUND,
+    HTTP_400_BAD_REQUEST,
 )
 
+from src.core.category.application.usecases.exceptions import InvalidCategoryData
 from src.core.category.application.usecases.create_category import (
     CreateCategory,
     CreateCategoryRequest
@@ -44,16 +46,14 @@ from src.django_project.category_app.serializers import (
 
 class CategoryViewSet(viewsets.ViewSet):
     def list(self, request: Request) -> Response:
-        order_by = request.query_params.get("order_by", "name")
-        current_page = int(request.query_params.get("current_page", 1))
-        per_page = int(request.query_params.get("per_page", 2))
+        input = ListCategory.Input(
+            order_by=request.query_params.get("order_by", "name"),
+            current_page=int(request.query_params.get("current_page", 1)),
+            per_page=int(request.query_params.get("per_page", 2)),
+        )
 
         use_case = ListCategory(repository=DjangoORMCategoryRepository())
-        response = use_case.execute(input=ListCategory.Input(
-            order_by=order_by,
-            current_page=current_page,
-            per_page=per_page,
-        ))
+        response = use_case.execute(input=input)
         serializer = ListCategoryResponseSerializer(instance=response)
 
         return Response(
@@ -87,7 +87,14 @@ class CategoryViewSet(viewsets.ViewSet):
 
         input = CreateCategoryRequest(**serializer.validated_data)
         use_case = CreateCategory(repository=DjangoORMCategoryRepository())
-        output = use_case.execute(request=input)
+
+        try:
+            output = use_case.execute(request=input)
+        except InvalidCategoryData as err:
+            return Response(
+                status=HTTP_400_BAD_REQUEST,
+                data={"error": str(err)}
+            )
 
         return Response(
             status=HTTP_201_CREATED,
