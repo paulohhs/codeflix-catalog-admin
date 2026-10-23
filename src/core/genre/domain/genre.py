@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from uuid import UUID
 
-from src.core._shared.entity import Entity
+from core._shared.domain.entity import Entity
 
 
 @dataclass
