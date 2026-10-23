@@ -1,10 +1,5 @@
 import pytest
 
-from src.core.cast_member.domain.cast_member import (
-    CastMemberType,
-    CastMember,
-)
-from src.core.cast_member.infra.in_memory_cast_member_repository import InMemoryCastMemberRepository
 from src.core.cast_member.application.use_cases.list_cast_member import (
     ListCastMember,
     CastMemberOutput,
@@ -24,27 +19,18 @@ class TestListCastMember:
     )
     def test_list_cast_members(
         self,
+        mock_actor_member,
+        mock_director_member,
+        mock_im_cast_member_repository,
         order_by: str,
         current_page: int,
     ):
-        cast_member_repository = InMemoryCastMemberRepository()
+        cast_member_repository = mock_im_cast_member_repository
 
-        member_1 = CastMember(
-            name="Member 1",
-            type=CastMemberType.DIRECTOR,
-        )
-        member_2 = CastMember(
-            name="Member 2",
-            type=CastMemberType.ACTOR,
-        )
-        member_3 = CastMember(
-            name="Member 3",
-            type=CastMemberType.DIRECTOR,
-        )
-        member_4 = CastMember(
-            name="Member 4",
-            type=CastMemberType.ACTOR,
-        )
+        member_1 = mock_director_member(name="Member 1")
+        member_2 = mock_actor_member(name="Member 2")
+        member_3 = mock_director_member(name="Member 3")
+        member_4 = mock_actor_member(name="Member 4")
         cast_member_repository.save(member_1)
         cast_member_repository.save(member_2)
         cast_member_repository.save(member_3)
@@ -84,10 +70,11 @@ class TestListCastMember:
             )
         )
 
-    def test_when_cast_mesmber_doesnt_exist_return_empty_data(self):
-        cast_member_repository = InMemoryCastMemberRepository()
-
-        use_case = ListCastMember(repository=cast_member_repository)
+    def test_when_cast_mesmber_doesnt_exist_return_empty_data(
+        self,
+        mock_im_cast_member_repository,
+    ):
+        use_case = ListCastMember(repository=mock_im_cast_member_repository)
         output = use_case.execute(input=ListCastMember.Input())
 
         assert len(output.data) == 0

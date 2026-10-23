@@ -1,16 +1,9 @@
-from unittest.mock import create_autospec
-
 import pytest
 
-from src.core.cast_member.domain.cast_member import (
-    CastMemberType,
-    CastMember,
-)
 from src.core.cast_member.application.use_cases.list_cast_member import (
     ListCastMember,
     CastMemberOutput,
 )
-from src.core.cast_member.domain.cast_member_repository import CastMemberRepository
 from src.core._shared.application.list_response import ListOutputMeta
 
 
@@ -26,27 +19,18 @@ class TestListCastMember:
     )
     def test_list_cast_members(
         self,
+        mock_cast_member_repository,
+        mock_actor_member,
+        mock_director_member,
         order_by: str,
         current_page: int,
     ):
-        cast_member_repository = create_autospec(CastMemberRepository)
+        cast_member_repository = mock_cast_member_repository
 
-        member_1 = CastMember(
-            name="Member 1",
-            type=CastMemberType.DIRECTOR,
-        )
-        member_2 = CastMember(
-            name="Member 2",
-            type=CastMemberType.ACTOR,
-        )
-        member_3 = CastMember(
-            name="Member 3",
-            type=CastMemberType.DIRECTOR,
-        )
-        member_4 = CastMember(
-            name="Member 4",
-            type=CastMemberType.ACTOR,
-        )
+        member_1 = mock_director_member(name="Member 1")
+        member_2 = mock_actor_member(name="Member 2")
+        member_3 = mock_director_member(name="Member 3")
+        member_4 = mock_actor_member(name="Member 4")
 
         cast_member_repository.list.return_value = [
             member_1,
@@ -89,8 +73,11 @@ class TestListCastMember:
             )
         )
 
-    def test_when_cast_mesmber_doesnt_exist_return_empty_data(self):
-        cast_member_repository = create_autospec(CastMemberRepository)
+    def test_when_cast_mesmber_doesnt_exist_return_empty_data(
+        self,
+        mock_cast_member_repository,
+    ):
+        cast_member_repository = mock_cast_member_repository
         cast_member_repository.list.return_value = []
 
         use_case = ListCastMember(repository=cast_member_repository)
