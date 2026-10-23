@@ -6,9 +6,7 @@ from src.core.category.application.usecases.list_category import ListOutputMeta
 from src.core.category.domain.category_repository import CategoryRepository
 from src.core.category.application.usecases.list_category import (
     CategoryOutput,
-    ListCategory, 
-    ListCategoryRequest, 
-    ListCategoryResponse
+    ListCategory,
 )
 from src.core.category.domain.category import Category
 
@@ -19,11 +17,10 @@ class TestListCategory:
         repository.list.return_value = []
 
         use_case = ListCategory(repository=repository)
-        request = ListCategoryRequest()
-        response = use_case.execute(request=request)
+        response = use_case.execute(input=ListCategory.Input())
 
-        assert isinstance(response, ListCategoryResponse)
-        assert response == ListCategoryResponse(
+        assert isinstance(response, ListCategory.Output)
+        assert response == ListCategory.Output(
             data=[],
             meta=ListOutputMeta(current_page=1, per_page=2, total=0)
         )
@@ -41,11 +38,10 @@ class TestListCategory:
         repository.list.return_value = [category_filme, category_serie]
 
         use_case = ListCategory(repository=repository)
-        request = ListCategoryRequest()
-        response = use_case.execute(request=request)
+        response = use_case.execute(input=ListCategory.Input())
 
-        assert isinstance(response, ListCategoryResponse)
-        assert response == ListCategoryResponse(
+        assert isinstance(response, ListCategory.Output)
+        assert response == ListCategory.Output(
             data=[
                 CategoryOutput(
                     id=category_filme.id,
@@ -133,14 +129,14 @@ class TestListCategory:
         ]
 
         use_case = ListCategory(repository=repository)
-        request = ListCategoryRequest(
+        input = ListCategory.Input(
             order_by=order_by,
             current_page=current_page
         )
-        response = use_case.execute(request=request)
+        response = use_case.execute(input=input)
 
-        assert isinstance(response, ListCategoryResponse)
-        assert response == ListCategoryResponse(
+        assert isinstance(response, ListCategory.Output)
+        assert response == ListCategory.Output(
             data=expected_data,
             meta=ListOutputMeta(
                 current_page=current_page,

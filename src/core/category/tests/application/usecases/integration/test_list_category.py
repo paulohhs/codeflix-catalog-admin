@@ -1,9 +1,7 @@
 from src.core.category.application.usecases.list_category import ListOutputMeta
 from src.core.category.application.usecases.list_category import (
     CategoryOutput,
-    ListCategory, 
-    ListCategoryRequest, 
-    ListCategoryResponse
+    ListCategory,
 )
 from src.core.category.domain.category import Category
 from src.core.category.infra.in_memory_category_repository import InMemoryCategoryRepository
@@ -14,11 +12,13 @@ class TestListCategory:
         repository = InMemoryCategoryRepository(categories=[])
 
         use_case = ListCategory(repository=repository)
-        request = ListCategoryRequest()
-        response = use_case.execute(request=request)
+        response = use_case.execute(input=ListCategory.Input())
 
-        assert isinstance(response, ListCategoryResponse)
-        assert response == ListCategoryResponse(data=[], meta=ListOutputMeta(current_page=1, per_page=2, total=0))
+        assert isinstance(response, ListCategory.Output)
+        assert response == ListCategory.Output(
+            data=[],
+            meta=ListOutputMeta(current_page=1, per_page=2, total=0)
+        )
 
     def test_return_existing_categories(self):
         category_filme = Category(
@@ -32,11 +32,10 @@ class TestListCategory:
         repository = InMemoryCategoryRepository(categories=[category_filme, category_serie])
 
         use_case = ListCategory(repository=repository)
-        request = ListCategoryRequest()
-        response = use_case.execute(request=request)
+        response = use_case.execute(input=ListCategory.Input())
 
-        assert isinstance(response, ListCategoryResponse)
-        assert response == ListCategoryResponse(
+        assert isinstance(response, ListCategory.Output)
+        assert response == ListCategory.Output(
             data=[
                 CategoryOutput(
                     id=category_filme.id,

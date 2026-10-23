@@ -25,7 +25,6 @@ from src.core.category.application.usecases.get_category import (
 )
 from src.core.category.application.usecases.list_category import (
     ListCategory,
-    ListCategoryRequest,
 )
 from src.django_project.category_app.repository import DjangoORMCategoryRepository
 from src.core.category.application.usecases.update_category import (
@@ -50,7 +49,7 @@ class CategoryViewSet(viewsets.ViewSet):
         per_page = int(request.query_params.get("per_page", 2))
 
         use_case = ListCategory(repository=DjangoORMCategoryRepository())
-        response = use_case.execute(request=ListCategoryRequest(
+        response = use_case.execute(input=ListCategory.Input(
             order_by=order_by,
             current_page=current_page,
             per_page=per_page,

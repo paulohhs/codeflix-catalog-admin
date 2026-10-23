@@ -6,11 +6,6 @@ from src.core._shared.application.list_response import ListOutput, ListOutputMet
 
 
 @dataclass
-class ListCategoryRequest(ListInput):
-    pass
-
-
-@dataclass
 class CategoryOutput:
     id: UUID
     name: str
@@ -18,16 +13,19 @@ class CategoryOutput:
     is_active: bool
 
 
-@dataclass
-class ListCategoryResponse(ListOutput[CategoryOutput]):
-    pass
-
-
 class ListCategory:
     def __init__(self, repository: CategoryRepository):
         self.repository = repository
 
-    def execute(self, request: ListCategoryRequest) -> ListCategoryResponse:
+    @dataclass
+    class Input(ListInput):
+        pass
+
+    @dataclass
+    class Output(ListOutput[CategoryOutput]):
+        pass
+
+    def execute(self, input: Input) -> Output:
         categories = self.repository.list()
 
         sorted_categories = sorted(
@@ -40,20 +38,20 @@ class ListCategory:
                 )
                 for category in categories
             ],
-            key=lambda category: getattr(category, request.order_by)
+            key=lambda category: getattr(category, input.order_by)
         )
 
-        categories_page = ListCategoryResponse.paginate(
+        categories_page = self.Output.paginate(
             objects=sorted_categories,
-            per_page=request.per_page,
-            current_page=request.current_page,
+            per_page=input.per_page,
+            current_page=input.current_page,
         )
 
-        return ListCategoryResponse(
+        return self.Output(
             data=categories_page,
             meta=ListOutputMeta(
-                current_page=request.current_page,
-                per_page=request.per_page,
+                current_page=input.current_page,
+                per_page=input.per_page,
                 total=len(sorted_categories)
             )
         )
