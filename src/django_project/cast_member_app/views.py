@@ -1,8 +1,13 @@
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.request import Request
-from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_201_CREATED, HTTP_404_NOT_FOUND, \
-    HTTP_204_NO_CONTENT
+from rest_framework.status import (
+    HTTP_200_OK,
+    HTTP_400_BAD_REQUEST,
+    HTTP_201_CREATED,
+    HTTP_404_NOT_FOUND,
+    HTTP_204_NO_CONTENT,
+)
 
 from src.core.cast_member.application.use_cases.update_cast_member import UpdateCastMember
 from src.core.cast_member.application.use_cases.delete_cast_member import DeleteCastMember
@@ -13,18 +18,24 @@ from src.core.cast_member.application.use_cases.list_cast_member import (
     ListCastMember
 )
 from src.django_project.cast_member_app.repository import DjangoORMCastMemberRepository
-from src.django_project.cast_member_app.serializers import ListCastMemberOutputSerializer, CreateCastMemberInputSerializer, \
-    CreateCastMemberOutputSerializer, DeleteCastMemberInputSerializer, UpdateCastMemberInputSerializer
+from src.django_project.cast_member_app.serializers import (
+    ListCastMemberOutputSerializer,
+    CreateCastMemberInputSerializer,
+    CreateCastMemberOutputSerializer,
+    DeleteCastMemberInputSerializer,
+    UpdateCastMemberInputSerializer,
+)
 
 
 class CastMemberViewSet(viewsets.ViewSet):
     def list(self, request: Request) -> Response:
         input = ListCastMember.Input(
             order_by=request.query_params.get("order_by", "name"),
-            current_page=int(request.query_params.get("current_page", 1))
+            current_page=int(request.query_params.get("current_page", 1)),
+            per_page=int(request.query_params.get("per_page", 2))
         )
-        use_case = ListCastMember(repository=DjangoORMCastMemberRepository())
 
+        use_case = ListCastMember(repository=DjangoORMCastMemberRepository())
         output: ListCastMember.Output = use_case.execute(input=input)
         serializer = ListCastMemberOutputSerializer(output)
 

@@ -40,15 +40,17 @@ class ListGenre:
             key=lambda genre: getattr(genre, input.order_by)
         )
 
-        DEFAULT_PAGE_SIZE = 2
-        page_offset = (input.current_page - 1) * DEFAULT_PAGE_SIZE
-        genres_page = sorted_genres[page_offset:page_offset + DEFAULT_PAGE_SIZE]
+        genres_page = self.Output.paginate(
+            objects=sorted_genres,
+            per_page=input.per_page,
+            current_page=input.current_page,
+        )
 
         return self.Output(
             data=genres_page,
             meta=ListOutputMeta(
                 current_page=input.current_page,
-                per_page=DEFAULT_PAGE_SIZE,
+                per_page=input.per_page,
                 total=len(sorted_genres)
             )
         )

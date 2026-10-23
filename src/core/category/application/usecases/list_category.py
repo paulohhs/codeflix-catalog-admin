@@ -43,15 +43,17 @@ class ListCategory:
             key=lambda category: getattr(category, request.order_by)
         )
 
-        DEFAULT_PAGE_SIZE = 2
-        page_offset = (request.current_page - 1) * DEFAULT_PAGE_SIZE
-        categories_page = sorted_categories[page_offset:page_offset + DEFAULT_PAGE_SIZE]
+        categories_page = ListCategoryResponse.paginate(
+            objects=sorted_categories,
+            per_page=request.per_page,
+            current_page=request.current_page,
+        )
 
         return ListCategoryResponse(
             data=categories_page,
             meta=ListOutputMeta(
                 current_page=request.current_page,
-                per_page=DEFAULT_PAGE_SIZE,
+                per_page=request.per_page,
                 total=len(sorted_categories)
             )
         )

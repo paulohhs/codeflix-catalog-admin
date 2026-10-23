@@ -37,12 +37,12 @@ class GenreViewSet(viewsets.ViewSet):
     def list(self, request: Request) -> Response:
         input = ListGenre.Input(
             order_by=request.query_params.get("order_by", "name"),
-            current_page=int(request.query_params.get("current_page", 1))
+            current_page=int(request.query_params.get("current_page", 1)),
+            per_page=int(request.query_params.get("per_page", 2))
         )
 
         use_case = ListGenre(repository=DjangoORMGenreRepository())
         output: ListGenre.Output = use_case.execute(input)
-     
         serializer = ListGenreOutputSerializer(output)
 
         return Response(

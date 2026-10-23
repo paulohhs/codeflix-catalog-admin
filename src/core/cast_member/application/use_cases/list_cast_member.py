@@ -39,15 +39,17 @@ class ListCastMember:
             key = lambda cast_member: getattr(cast_member, input.order_by)
         )
 
-        DEFAULT_PAGE_SIZE = 2
-        page_offset = (input.current_page - 1) * DEFAULT_PAGE_SIZE
-        cast_members_page = sorted_cast_members[page_offset:page_offset + DEFAULT_PAGE_SIZE]
+        cast_members_page = self.Output.paginate(
+            objects=sorted_cast_members,
+            per_page=input.per_page,
+            current_page=input.current_page,
+        )
 
         return self.Output(
             data=cast_members_page,
             meta=ListOutputMeta(
                 current_page=input.current_page,
-                per_page=DEFAULT_PAGE_SIZE,
+                per_page=input.per_page,
                 total=len(sorted_cast_members)
             )
         )
