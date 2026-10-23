@@ -1,26 +1,29 @@
-from src.core.category.application.usecases.update_category import UpdateCategory, UpdateCategoryRequest
-from src.core.category.domain.category import Category
-from src.core.category.infra.in_memory_category_repository import InMemoryCategoryRepository
+from src.core.category.application.usecases.update_category import (
+    UpdateCategory,
+    UpdateCategoryRequest,
+)
 
 
 class TestUpdateCategory:
-    def test_can_update_category_name_and_description(self):
-        category = Category(
-            name="Filme", 
-            description="This is a test category",
-        )
-        repository = InMemoryCategoryRepository()
-        repository.save(category=category)
+    def test_can_update_category_name_and_description(
+        self,
+        mock_im_category_repository_with_data,
+    ):
+        (
+            movie_category,
+            _,
+            repository,
+        ) = mock_im_category_repository_with_data
 
         use_case = UpdateCategory(repository=repository)
         request = UpdateCategoryRequest(
-            id=category.id,
+            id=movie_category.id,
             name="Série",
             description="New description",
         )
 
         use_case.execute(request=request)
 
-        updated_category = repository.get_by_id(category.id)
+        updated_category = repository.get_by_id(movie_category.id)
         assert updated_category.name == "Série"
         assert updated_category.description == "New description"

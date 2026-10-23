@@ -8,7 +8,6 @@ from src.core.category.application.usecases.create_category import (
     CreateCategory,
     CreateCategoryRequest,
     CreateCategoryResponse,
-    InvalidCategoryData,
 )
 from src.core.category.application.usecases.exceptions import (
     InvalidCategoryData,
