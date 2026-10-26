@@ -44,7 +44,7 @@ class TestCreateVideoWithoutMedia:
         input = CreateVideoWithoutMedia.Input(
             title="Test Video Title",
             description="Test Description",
-            launched_year=2021,
+            launch_year=2021,
             duration=Decimal(100),
             rating=Rating.L.value,
             opened=True,

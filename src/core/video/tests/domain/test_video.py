@@ -18,9 +18,8 @@ class TestVideo:
             id=video_id,
             title="Video Title",
             description="Title Description",
-            launched_year=2021,
+            launch_year=2021,
             duration=Decimal(),
-            published=True,
             rating=Rating.L,
             opened=True,
             categories=category_ids,
@@ -31,9 +30,9 @@ class TestVideo:
         assert video.id == video_id
         assert video.title == "Video Title"
         assert video.description == "Title Description"
-        assert video.launched_year == 2021
+        assert video.launch_year == 2021
         assert video.duration == Decimal()
-        assert video.published == True
+        assert video.published == False
         assert video.rating == Rating.L
         assert video.categories == category_ids
         assert video.genres == genre_ids
@@ -83,9 +82,8 @@ class TestVideo:
             id=video_id,
             title="Video Title",
             description="Title Description",
-            launched_year=2021,
+            launch_year=2021,
             duration=Decimal(),
-            published=True,
             rating=Rating.L,
             opened=True,
             categories=category_ids,
@@ -101,9 +99,9 @@ class TestVideo:
         assert video.id == video_id
         assert video.title == "Video Title"
         assert video.description == "Title Description"
-        assert video.launched_year == 2021
+        assert video.launch_year == 2021
         assert video.duration == Decimal()
-        assert video.published == True
+        assert video.published == False
         assert video.rating == Rating.L
         assert video.categories == category_ids
         assert video.genres == genre_ids
@@ -125,9 +123,8 @@ class TestVideo:
                 id=video_id,
                 title="",
                 description="Title Description",
-                launched_year=2021,
+                launch_year=2021,
                 duration=Decimal(),
-                published=True,
                 rating=Rating.L,
                 opened=True,
                 categories=category_ids,
@@ -140,9 +137,8 @@ class TestVideo:
                 id=video_id,
                 title="a" * 256,
                 description="Title Description",
-                launched_year=2021,
+                launch_year=2021,
                 duration=Decimal(),
-                published=True,
                 rating=Rating.L,
                 opened=True,
                 categories=category_ids,

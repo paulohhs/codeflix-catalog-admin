@@ -1,7 +1,8 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from decimal import Decimal
 from uuid import UUID
 
+from core.video.domain.value_objects import MediaStatus
 from src.core.video.domain.value_objects import (
     Rating,
     ImageMedia,
@@ -14,11 +15,11 @@ from src.core._shared.domain.entity import Entity
 class Video(Entity):
     title: str
     description: str
-    launched_year: int
+    launch_year: int
     duration: Decimal
-    published: bool
     rating: Rating
     opened: bool
+    published: bool = field(default=False, init=False)
 
     categories: set[UUID]
     genres: set[UUID]
@@ -48,20 +49,35 @@ class Video(Entity):
         self,
         title: str,
         description: str,
-        launched_year: int,
+        launch_year: int,
         duration: Decimal,
         published: bool,
         rating: Rating,
         opened: bool,
+        categories: set[UUID],
+        genres: set[UUID],
+        cast_members: set[UUID],
     ):
         self.title = title
         self.description = description
-        self.launched_year = launched_year
+        self.launch_year = launch_year
         self.duration = duration
         self.published = published
         self.rating = rating
         self.opened = opened
+        self.categories = categories
+        self.genres = genres
+        self.cast_members = cast_members
 
+        self.validate()
+
+    def publish(self) -> None:
+        if not self.video:
+            self.notification.add_error("Video media is required to publish the video")
+        elif self.video.status != MediaStatus.COMPLETED:
+            self.notification.add_error("Video must be fully processed to be published")
+
+        self.published = True
         self.validate()
 
     def add_category(self, category_id: UUID) -> None:

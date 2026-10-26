@@ -21,7 +21,7 @@ class CreateVideoWithoutMedia:
     class Input:
         title: str
         description: str
-        launched_year: int
+        launch_year: int
         duration: Decimal
         rating: str
         opened: bool
@@ -59,9 +59,8 @@ class CreateVideoWithoutMedia:
             video = Video(
                 title=input.title,
                 description=input.description,
-                launched_year=input.launched_year,
+                launch_year=input.launch_year,
                 duration=input.duration,
-                published=False,
                 rating=Rating(input.rating),
                 opened=input.opened,
                 categories=input.categories,

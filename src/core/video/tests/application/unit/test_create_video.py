@@ -87,7 +87,7 @@ class TestCreateVideoWithoutMedia:
         input_data = dict(
             title="Test Video",
             description="Test Description",
-            launched_year=2021,
+            launch_year=2021,
             duration=Decimal(100),
             rating=Rating.L,
             opened=True,
@@ -145,7 +145,7 @@ class TestCreateVideoWithoutMedia:
         input = CreateVideoWithoutMedia.Input(
             title=invalid_title,
             description="Test Description",
-            launched_year=2021,
+            launch_year=2021,
             duration=Decimal(100),
             rating=Rating.L.value,
             opened=True,
@@ -194,7 +194,7 @@ class TestCreateVideoWithoutMedia:
         input = CreateVideoWithoutMedia.Input(
             title="Test Video Title",
             description="Test Description",
-            launched_year=2021,
+            launch_year=2021,
             duration=Decimal(100),
             rating=Rating.L.value,
             opened=True,
@@ -210,9 +210,8 @@ class TestCreateVideoWithoutMedia:
                 id=output.id,
                 title="Test Video Title",
                 description="Test Description",
-                launched_year=2021,
+                launch_year=2021,
                 duration=Decimal(100),
-                published=False,
                 rating=Rating.L,
                 opened=True,
                 categories=category_ids,
