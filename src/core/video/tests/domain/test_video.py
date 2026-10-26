@@ -3,7 +3,7 @@ from decimal import Decimal
 
 import pytest
 
-from core.video.domain.value_objects import Rating, ImageMedia, AudioVideoMedia, MediaStatus
+from src.core.video.domain.value_objects import Rating, ImageMedia, AudioVideoMedia, MediaStatus
 from src.core.video.domain.video import Video
 
 
