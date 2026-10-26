@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from enum import Enum, unique, auto
+from enum import Enum, unique
 from uuid import UUID
 
 
@@ -9,6 +9,14 @@ class ImageMedia:
     check_sum: str
     name: str
     location: str
+
+
+@unique
+class MediaStatus(Enum):
+    PENDING = "PENDING"
+    PROCESSING = "PROCESSING"
+    COMPLETED = "COMPLETED"
+    ERROR = "ERROR"
 
 
 @dataclass(frozen=True)
@@ -22,22 +30,14 @@ class AudioVideoMedia:
 
 
 @unique
-class MediaStatus(Enum):
-    PENDING = auto()
-    PROCESSING = auto()
-    COMPLETED = auto()
-    ERROR = auto()
-
-
-@unique
 class Rating(Enum):
-    ER = auto()
-    L = auto()
-    AGE_10 = auto()
-    AGE_12 = auto()
-    AGE_14 = auto()
-    AGE_16 = auto()
-    AGE_18 = auto()
+    ER = "ER"
+    L = "L"
+    AGE_10 = "AGE_10"
+    AGE_12 = "AGE_12"
+    AGE_14 = "AGE_14"
+    AGE_16 = "AGE_16"
+    AGE_18 = "AGE_18"
 
 
 
