@@ -3,10 +3,12 @@ from decimal import Decimal
 
 import pytest
 
-from src.core.video.application.use_cases.exceptions import InvalidVideo
+from src.core.video.application.use_cases.exceptions import (
+    InvalidVideo,
+    RelatedEntitiesNotFound,
+)
 from src.core.video.domain.value_objects import Rating
 from src.core.video.application.use_cases.create_video_without_media import CreateVideoWithoutMedia
-from src.core.video.application.use_cases.exceptions import RelatedEntitiesNotFound
 from src.core.video.domain.video import Video
 
 
