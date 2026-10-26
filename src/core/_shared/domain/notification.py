@@ -16,3 +16,6 @@ class Notification:
 
     def add_error(self, message: str) -> None:
         self.errors.append(message)
+
+    def add_errors(self, errors: list[str]) -> None:
+        self.errors.extend(errors)
