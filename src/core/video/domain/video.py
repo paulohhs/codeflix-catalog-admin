@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from decimal import Decimal
 from uuid import UUID
 
-from core.video.domain.value_objects import MediaStatus
+from src.core.video.domain.value_objects import MediaStatus
 from src.core.video.domain.value_objects import (
     Rating,
     ImageMedia,
