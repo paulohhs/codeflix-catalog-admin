@@ -44,34 +44,24 @@ class TestVideo:
         genre_ids = {uuid.uuid4(), uuid.uuid4()}
         cast_member_ids = {uuid.uuid4(), uuid.uuid4()}
         banner = ImageMedia(
-            id=uuid.uuid4(),
-            check_sum="123",
             name="Banner test",
             location="",
         )
         thumbnail = ImageMedia(
-            id=uuid.uuid4(),
-            check_sum="345",
             name="Thumbnail test",
             location="",
         )
         thumbnail_half = ImageMedia(
-            id=uuid.uuid4(),
-            check_sum="567",
             name="Thumbnail Half test",
             location="",
         )
         trailer = AudioVideoMedia(
-            id=uuid.uuid4(),
-            check_sum="789",
             name="Trailer test",
             raw_location="raw test location",
             encoded_location="encoded test location",
             status=MediaStatus.COMPLETED,
         )
         media_video = AudioVideoMedia(
-            id=uuid.uuid4(),
-            check_sum="910",
             name="Media Video test",
             raw_location="raw test location",
             encoded_location="encoded test location",
