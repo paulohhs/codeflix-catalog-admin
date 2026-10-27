@@ -85,3 +85,15 @@ def mock_im_genre_repository_with_data(
 @pytest.fixture
 def genre_repository() -> DjangoORMGenreRepository:
     return DjangoORMGenreRepository()
+
+
+@pytest.fixture
+def genre_repository_with_data(
+    mock_comedy_genre,
+    mock_drama_genre,
+) -> tuple[Genre, Genre, DjangoORMGenreRepository]:
+    repository = DjangoORMGenreRepository()
+    repository.save(mock_comedy_genre)
+    repository.save(mock_drama_genre)
+
+    return mock_comedy_genre, mock_drama_genre, repository

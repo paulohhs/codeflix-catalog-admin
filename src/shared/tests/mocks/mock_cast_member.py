@@ -77,3 +77,18 @@ def mock_im_cast_member_repository_with_data(
 @pytest.fixture
 def cast_member_repository() -> DjangoORMCastMemberRepository:
     return DjangoORMCastMemberRepository()
+
+
+@pytest.fixture
+def cast_member_repository_with_data(
+    mock_actor_member,
+    mock_director_member,
+) -> tuple[CastMember, CastMember, DjangoORMCastMemberRepository]:
+    repository = DjangoORMCastMemberRepository()
+    actor_member = mock_actor_member()
+    director_member = mock_director_member()
+
+    repository.save(actor_member)
+    repository.save(director_member)
+
+    return actor_member, director_member, repository
