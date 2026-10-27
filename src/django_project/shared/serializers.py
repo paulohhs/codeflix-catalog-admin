@@ -18,3 +18,11 @@ class ListResponseSerializer(Generic[T], serializers.Serializer):
 
 class IdSerializer(serializers.Serializer):
     id = serializers.UUIDField()
+
+
+class SetField(serializers.ListField):
+    def to_internal_value(self, data):
+        return set(super().to_internal_value(data))
+
+    def to_representation(self, data):
+        return list(super().to_representation(data))
