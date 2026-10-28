@@ -2,17 +2,46 @@ from uuid import UUID
 
 from django.db import transaction
 
+from src.core.video.domain.value_objects import MediaStatus
 from src.core.video.domain.value_objects import Rating
 from src.core.video.domain.value_objects import AudioVideoMedia
 from src.core.video.domain.video import Video
 from src.core.video.domain.repository import VideoRepository
-from src.django_project.video_app.models import Video as VideoORM, AudioVideoMedia as AudioVideoMediaORM
+from src.core.video.domain.value_objects import ImageMedia
+from src.django_project.video_app.models import (
+    Video as VideoORM,
+    AudioVideoMedia as AudioVideoMediaORM,
+    ImageMedia as ImageMediaORM,
+)
 
 
 class DjangoORMVideoRepository(VideoRepository):
+    def _save_medias(self, video_model: VideoORM) -> None:
+        for media in [
+            video_model.banner,
+            video_model.thumbnail,
+            video_model.thumbnail_half,
+            video_model.trailer,
+            video_model.video,
+        ]:
+            if media:
+                media.save()
+
+    def _delete_medias(self, video_model: VideoORM) -> None:
+        for media in [
+            video_model.banner,
+            video_model.thumbnail,
+            video_model.thumbnail_half,
+            video_model.trailer,
+            video_model.video,
+        ]:
+            if media:
+                media.delete()
+
     def save(self, video: Video) -> None:
         with transaction.atomic():
             video_model = VideoModelMapper.to_model(video)
+            self._save_medias(video_model)
             video_model.save()
             video_model.categories.set(video.categories)
             video_model.genres.set(video.genres)
@@ -40,20 +69,15 @@ class DjangoORMVideoRepository(VideoRepository):
 
         with transaction.atomic():
             # Remove related medias - if they exist
-            if video_model.video:
-                AudioVideoMediaORM.objects.filter(id=video_model.video.id).delete()
+            self._delete_medias(video_model=video_model)
 
             # Persist related medias if they exist in the entity
-            video_media = None
-            if video.video:
-                video_media = AudioVideoMediaORM.objects.create(
-                    name=video.video.name,
-                    raw_location=video.video.raw_location,
-                    encoded_location=video.video.encoded_location,
-                    status=video.video.status,
-                )
-
-            video_model.video = video_media
+            video_model.banner = VideoModelMapper.image_to_model(video.banner)
+            video_model.thumbnail = VideoModelMapper.image_to_model(video.thumbnail)
+            video_model.thumbnail_half = VideoModelMapper.image_to_model(video.thumbnail_half)
+            video_model.trailer = VideoModelMapper.audio_video_to_model(video.trailer)
+            video_model.video = VideoModelMapper.audio_video_to_model(video.video)
+            self._save_medias(video_model)
 
             # Update relationships with other entities/aggregates
             video_model.categories.set(video.categories)
@@ -73,11 +97,63 @@ class DjangoORMVideoRepository(VideoRepository):
 
 class VideoModelMapper:
     @staticmethod
+    def image_to_model(media: ImageMedia | None) -> ImageMediaORM | None:
+        if not media:
+            return None
+
+        return ImageMediaORM(
+            name=media.name,
+            raw_location=media.location,
+            checksum="",
+        )
+
+    @staticmethod
+    def audio_video_to_model(media: AudioVideoMedia | None) -> AudioVideoMediaORM | None:
+        if media is None:
+            return None
+        return AudioVideoMediaORM(
+            name=media.name,
+            raw_location=media.raw_location,
+            encoded_location=media.encoded_location,
+            status=media.status.value,
+            checksum="",
+        )
+
+    @staticmethod
+    def image_to_entity(
+        image_model: ImageMediaORM | None
+    ) -> ImageMedia | None:
+        if not image_model:
+            return None
+
+        return ImageMedia(
+            name=image_model.name,
+            location=image_model.raw_location,
+        )
+
+    @staticmethod
+    def audio_video_to_entity(
+        audio_video_model: AudioVideoMediaORM | None
+    ) -> AudioVideoMedia | None:
+        if not audio_video_model:
+            return None
+
+        return AudioVideoMedia(
+            name=audio_video_model.name,
+            raw_location=audio_video_model.raw_location,
+            encoded_location=audio_video_model.encoded_location,
+            status=MediaStatus(audio_video_model.status),
+        )
+
+    @staticmethod
     def to_entity(model: VideoORM) -> Video:
         rating = model.rating
 
-        if not isinstance(rating, Rating) and "Rating" in rating:
-            rating = Rating(rating.split(".")[-1])
+        if not isinstance(rating, Rating):
+            if "Rating" in rating:
+                rating = Rating(rating.split(".")[-1])
+            else:
+                rating = Rating(rating)
 
         video = Video(
             id=model.id,
@@ -92,13 +168,21 @@ class VideoModelMapper:
             cast_members=set(model.cast_members.values_list("id", flat=True)),
         )
 
-        if model.video:
-            video.video = AudioVideoMedia(
-                name=model.video.name,
-                raw_location=model.video.raw_location,
-                encoded_location=model.video.encoded_location,
-                status=model.video.status,
-            )
+        video.banner = VideoModelMapper.image_to_entity(
+            image_model=model.banner
+        )
+        video.thumbnail = VideoModelMapper.image_to_entity(
+            image_model=model.thumbnail
+        )
+        video.thumbnail_half = VideoModelMapper.image_to_entity(
+            image_model=model.thumbnail_half
+        )
+        video.trailer = VideoModelMapper.audio_video_to_entity(
+            audio_video_model=model.trailer
+        )
+        video.video = VideoModelMapper.audio_video_to_entity(
+            audio_video_model=model.video
+        )
 
         return video
 
@@ -111,6 +195,11 @@ class VideoModelMapper:
             launch_year=video.launch_year,
             opened=video.opened,
             duration=video.duration,
-            rating=video.rating,
+            rating=video.rating.value,
             published=video.published,
+            banner=VideoModelMapper.image_to_model(video.banner),
+            thumbnail=VideoModelMapper.image_to_model(video.thumbnail),
+            thumbnail_half=VideoModelMapper.image_to_model(video.thumbnail_half),
+            trailer=VideoModelMapper.audio_video_to_model(video.trailer),
+            video=VideoModelMapper.audio_video_to_model(video.video),
         )
