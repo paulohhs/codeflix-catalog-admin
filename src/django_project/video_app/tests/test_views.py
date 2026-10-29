@@ -3,6 +3,7 @@ from uuid import UUID
 
 import pytest
 
+from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.test import APIClient
 from rest_framework import status
 
@@ -59,6 +60,41 @@ class TestCreateAPI:
                 UUID(mock_create_video_valid_payload_without_media["cast_members"][0])
             }
         )
+
+
+@pytest.mark.django_db
+class TestPatchAPI:
+    def test_upload_video(
+        self,
+        mock_video_without_media,
+        video_repository,
+    ):
+        assert mock_video_without_media.video is None
+        video_repository.save(video=mock_video_without_media)
+
+        video_file_mock = SimpleUploadedFile(
+            name="video.mp4",
+            content=b"images/123123/video.mp4",
+            content_type="video/mp4"
+        )
+
+        url = f"/api/videos/{mock_video_without_media.id}/"
+        response = APIClient().patch(
+            url,
+            data={"video_file": video_file_mock},
+            format="multipart",
+        )
+        assert response.status_code == status.HTTP_204_NO_CONTENT
+
+        updated_video = video_repository.get_by_id(id=mock_video_without_media.id)
+        assert updated_video.video is not None
+        assert updated_video.video == AudioVideoMedia(
+            name=video_file_mock.name,
+            raw_location=f'videos/{mock_video_without_media.id}/video.mp4',
+            encoded_location='',
+            status=MediaStatus.PENDING
+        )
+
 
 
 @pytest.mark.django_db
