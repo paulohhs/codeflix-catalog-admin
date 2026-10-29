@@ -11,6 +11,7 @@ from rest_framework.status import (
     HTTP_200_OK,
 )
 
+from src.core._shared.events.message_bus import MessageBus
 from src.django_project.video_app.serializers import ListVideoOutputSerializer
 from src.core.video.application.use_cases.list_video import ListVideo
 from src.core._shared.infrastructure.storage.local_storage import LocalStorage
@@ -65,6 +66,7 @@ class VideoViewSet(viewsets.ViewSet):
         upload_video = UploadVideo(
             video_repository=DjangoORMVideoRepository(),
             storage_service=LocalStorage(),
+            message_bus=MessageBus(),
         )
 
         try:
