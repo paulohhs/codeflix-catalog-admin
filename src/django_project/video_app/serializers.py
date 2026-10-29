@@ -25,7 +25,7 @@ class CreateVideoWithoutMediaOutputSerializer(IdSerializer):
 
 class ImageMediaOutputSerializer(serializers.Serializer):
     name = serializers.CharField()
-    location = serializers.CharField()
+    raw_location = serializers.CharField()
 
 
 class AudioVideoMediaOutputSerializer(serializers.Serializer):
@@ -33,6 +33,7 @@ class AudioVideoMediaOutputSerializer(serializers.Serializer):
     raw_location = serializers.CharField()
     encoded_location = serializers.CharField()
     status = serializers.CharField(source="status.value")
+    media_type = serializers.CharField(source="media_type.value")
 
 
 class VideoOutputSerializer(IdSerializer):
