@@ -108,6 +108,6 @@ class Video(Entity):
         self.trailer = trailer
         self.validate()
 
-    def update_video(self, video: AudioVideoMedia) -> None:
+    def update_video_media(self, video: AudioVideoMedia) -> None:
         self.video = video
         self.validate()

@@ -45,6 +45,6 @@ class UploadVideo:
             encoded_location="",
             status=MediaStatus.PENDING,
         )
-        video.update_video(audio_video_media)
+        video.update_video_media(audio_video_media)
 
         self.video_repository.update(video)
