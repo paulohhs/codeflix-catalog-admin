@@ -7,7 +7,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.test import APIClient
 from rest_framework import status
 
-from src.core.video.domain.value_objects import ImageMedia, AudioVideoMedia, MediaStatus
+from src.core.video.domain.value_objects import ImageMedia, AudioVideoMedia, MediaStatus, MediaType
 from src.core.video.domain.value_objects import Rating
 from src.core.video.domain.video import Video
 
@@ -92,7 +92,8 @@ class TestPatchAPI:
             name=video_file_mock.name,
             raw_location=f'videos/{mock_video_without_media.id}/video.mp4',
             encoded_location='',
-            status=MediaStatus.PENDING
+            status=MediaStatus.PENDING,
+            media_type=MediaType.VIDEO
         )
 
 
@@ -107,7 +108,7 @@ class TestListAPI:
 
         return {
             "name": image.name,
-            "location": image.location,
+            "raw_location": image.raw_location,
         }
 
     def _create_audio_video_data_expected(
@@ -121,6 +122,7 @@ class TestListAPI:
             "raw_location": audio_video.raw_location,
             "encoded_location": audio_video.encoded_location,
             "status": audio_video.status.value,
+            "media_type": audio_video.media_type.value,
         }
 
     def test_when_videos_does_not_exist_then_return_empty_list(self):
@@ -149,12 +151,13 @@ class TestListAPI:
         video_repository,
         current_page,
     ):
-        banner = ImageMedia(name="banner.png", location="images/banner.png")
+        banner = ImageMedia(name="banner.png", raw_location="images/banner.png")
         video_media = AudioVideoMedia(
             name="video.mp4",
             raw_location="images/123123/video.mp4",
             encoded_location="",
             status=MediaStatus.PENDING,
+            media_type=MediaType.VIDEO
         )
         video_1 = mock_video(title="Video Um", banner=banner)
         video_2 = mock_video(title="Video Dois")

@@ -4,7 +4,7 @@ from unittest.mock import create_autospec
 import pytest
 
 from src.core.video.application.use_cases.exceptions import VideoNotFound
-from src.core.video.domain.value_objects import AudioVideoMedia, MediaStatus
+from src.core.video.domain.value_objects import AudioVideoMedia, MediaStatus, MediaType
 from src.core.video.application.use_cases.upload_video import UploadVideo
 from src.core._shared.infrastructure.storage.abstract_storage_service import AbstractStorageService
 
@@ -43,6 +43,7 @@ class TestUploadVideo:
             raw_location=f"videos/{video.id}/video.mp4",
             encoded_location="",
             status=MediaStatus.PENDING,
+            media_type=MediaType.VIDEO
         )
 
     def test_when_video_does_not_exist_then_raise_error(

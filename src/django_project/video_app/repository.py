@@ -2,7 +2,7 @@ from uuid import UUID
 
 from django.db import transaction
 
-from src.core.video.domain.value_objects import MediaStatus
+from src.core.video.domain.value_objects import MediaStatus, MediaType
 from src.core.video.domain.value_objects import Rating
 from src.core.video.domain.value_objects import AudioVideoMedia
 from src.core.video.domain.video import Video
@@ -103,7 +103,7 @@ class VideoModelMapper:
 
         return ImageMediaORM(
             name=media.name,
-            raw_location=media.location,
+            raw_location=media.raw_location,
             checksum="",
         )
 
@@ -128,7 +128,7 @@ class VideoModelMapper:
 
         return ImageMedia(
             name=image_model.name,
-            location=image_model.raw_location,
+            raw_location=image_model.raw_location,
         )
 
     @staticmethod
@@ -143,6 +143,7 @@ class VideoModelMapper:
             raw_location=audio_video_model.raw_location,
             encoded_location=audio_video_model.encoded_location,
             status=MediaStatus(audio_video_model.status),
+            media_type=MediaType.VIDEO
         )
 
     @staticmethod

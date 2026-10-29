@@ -2,7 +2,7 @@ import uuid
 
 import pytest
 
-from src.core.video.domain.value_objects import AudioVideoMedia, MediaStatus
+from src.core.video.domain.value_objects import AudioVideoMedia, MediaStatus, MediaType
 from src.core.video.application.use_cases.list_video import ListVideo, VideoOutput
 
 from decimal import Decimal
@@ -26,6 +26,7 @@ class TestListVideo:
                 raw_location=f"videos/123123123/video.mp4",
                 encoded_location="",
                 status=MediaStatus.COMPLETED,
+                media_type=MediaType.VIDEO
             )
 
         video = Video(

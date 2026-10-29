@@ -3,7 +3,13 @@ from decimal import Decimal
 
 import pytest
 
-from src.core.video.domain.value_objects import Rating, ImageMedia, AudioVideoMedia, MediaStatus
+from src.core.video.domain.value_objects import (
+    Rating,
+    ImageMedia,
+    AudioVideoMedia,
+    MediaStatus,
+    MediaType,
+)
 from src.core.video.domain.video import Video
 
 
@@ -45,27 +51,29 @@ class TestVideo:
         cast_member_ids = {uuid.uuid4(), uuid.uuid4()}
         banner = ImageMedia(
             name="Banner test",
-            location="",
+            raw_location="",
         )
         thumbnail = ImageMedia(
             name="Thumbnail test",
-            location="",
+            raw_location="",
         )
         thumbnail_half = ImageMedia(
             name="Thumbnail Half test",
-            location="",
+            raw_location="",
         )
         trailer = AudioVideoMedia(
             name="Trailer test",
             raw_location="raw test location",
             encoded_location="encoded test location",
             status=MediaStatus.COMPLETED,
+            media_type=MediaType.VIDEO
         )
         media_video = AudioVideoMedia(
             name="Media Video test",
             raw_location="raw test location",
             encoded_location="encoded test location",
             status=MediaStatus.COMPLETED,
+            media_type=MediaType.VIDEO
         )
 
         video = Video(
