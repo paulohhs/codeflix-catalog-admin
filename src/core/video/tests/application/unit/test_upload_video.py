@@ -3,10 +3,12 @@ from unittest.mock import create_autospec
 
 import pytest
 
+from src.core.video.application.events.integration_events import AudioVideoMediaUpdatedIntegrationEvent
 from src.core.video.application.use_cases.exceptions import VideoNotFound
 from src.core.video.domain.value_objects import AudioVideoMedia, MediaStatus, MediaType
 from src.core.video.application.use_cases.upload_video import UploadVideo
 from src.core._shared.infrastructure.storage.abstract_storage_service import AbstractStorageService
+from src.core._shared.events.abstract_message_bus import AbstractMessageBus
 
 
 @pytest.mark.django_db
@@ -19,10 +21,12 @@ class TestUploadVideo:
         video = mock_video_without_media
         mock_im_video_repository.videos = [video]
         mock_storage = create_autospec(AbstractStorageService)
+        mock_message_bus = create_autospec(AbstractMessageBus)
 
         use_case = UploadVideo(
             video_repository=mock_im_video_repository,
             storage_service=mock_storage,
+            message_bus=mock_message_bus,
         )
         input = UploadVideo.Input(
             video_id=video.id,
@@ -45,6 +49,12 @@ class TestUploadVideo:
             status=MediaStatus.PENDING,
             media_type=MediaType.VIDEO
         )
+        mock_message_bus.handle.assert_called_once_with([
+            AudioVideoMediaUpdatedIntegrationEvent(
+                resource_id=f"{video.id}.{MediaType.VIDEO}",
+                file_path=f"videos/{video.id}/video.mp4",
+            )
+        ])
 
     def test_when_video_does_not_exist_then_raise_error(
         self,
@@ -52,10 +62,12 @@ class TestUploadVideo:
     ):
         inexist_video_id = uuid.uuid4()
         mock_storage = create_autospec(AbstractStorageService)
+        mock_message_bus = create_autospec(AbstractMessageBus)
 
         use_case = UploadVideo(
             video_repository=mock_im_video_repository,
             storage_service=mock_storage,
+            message_bus=mock_message_bus,
         )
         input = UploadVideo.Input(
             video_id=inexist_video_id,
