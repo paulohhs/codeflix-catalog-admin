@@ -3,9 +3,11 @@ from uuid import UUID
 
 import pytest
 
+from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.test import APIClient
 from rest_framework import status
 
+from src.core.video.domain.value_objects import ImageMedia, AudioVideoMedia, MediaStatus
 from src.core.video.domain.value_objects import Rating
 from src.core.video.domain.video import Video
 
@@ -58,3 +60,152 @@ class TestCreateAPI:
                 UUID(mock_create_video_valid_payload_without_media["cast_members"][0])
             }
         )
+
+
+@pytest.mark.django_db
+class TestPatchAPI:
+    def test_upload_video(
+        self,
+        mock_video_without_media,
+        video_repository,
+    ):
+        assert mock_video_without_media.video is None
+        video_repository.save(video=mock_video_without_media)
+
+        video_file_mock = SimpleUploadedFile(
+            name="video.mp4",
+            content=b"images/123123/video.mp4",
+            content_type="video/mp4"
+        )
+
+        url = f"/api/videos/{mock_video_without_media.id}/"
+        response = APIClient().patch(
+            url,
+            data={"video_file": video_file_mock},
+            format="multipart",
+        )
+        assert response.status_code == status.HTTP_204_NO_CONTENT
+
+        updated_video = video_repository.get_by_id(id=mock_video_without_media.id)
+        assert updated_video.video is not None
+        assert updated_video.video == AudioVideoMedia(
+            name=video_file_mock.name,
+            raw_location=f'videos/{mock_video_without_media.id}/video.mp4',
+            encoded_location='',
+            status=MediaStatus.PENDING
+        )
+
+
+
+@pytest.mark.django_db
+class TestListAPI:
+    def _create_image_data_expected(
+        self, image: ImageMedia
+    ) -> dict | None:
+        if not image:
+            return None
+
+        return {
+            "name": image.name,
+            "location": image.location,
+        }
+
+    def _create_audio_video_data_expected(
+        self, audio_video: AudioVideoMedia
+    ) -> dict | None:
+        if not audio_video:
+            return None
+
+        return {
+            "name": audio_video.name,
+            "raw_location": audio_video.raw_location,
+            "encoded_location": audio_video.encoded_location,
+            "status": audio_video.status.value,
+        }
+
+    def test_when_videos_does_not_exist_then_return_empty_list(self):
+        expected_response = {
+            "data": [],
+            "meta": {
+                "current_page": 1,
+                "per_page": 2,
+                "total": 0,
+            }
+        }
+        url = "/api/videos/"
+
+        response = APIClient().get(url)
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == expected_response
+
+
+    @pytest.mark.parametrize(
+        "current_page",
+        [1, 2, 3]
+    )
+    def test_list_video(
+        self,
+        mock_video,
+        video_repository,
+        current_page,
+    ):
+        banner = ImageMedia(name="banner.png", location="images/banner.png")
+        video_media = AudioVideoMedia(
+            name="video.mp4",
+            raw_location="images/123123/video.mp4",
+            encoded_location="",
+            status=MediaStatus.PENDING,
+        )
+        video_1 = mock_video(title="Video Um", banner=banner)
+        video_2 = mock_video(title="Video Dois")
+        video_3 = mock_video(title="Video Tres", video=video_media)
+        video_4 = mock_video(title="Video Quatro")
+        video_5 = mock_video(title="Video Cinco")
+
+        video_repository.save(video=video_1)
+        video_repository.save(video=video_2)
+        video_repository.save(video=video_3)
+        video_repository.save(video=video_4)
+        video_repository.save(video=video_5)
+
+        expected_data_per_page = {
+            1: [video_5, video_2],
+            2: [video_4, video_3],
+            3: [video_1]
+        }
+
+        def _transform_ids_to_strs(_ids: set[UUID]) -> list[str]:
+            return [str(_id) for _id in _ids]
+
+        expected_response = {
+            "data": [
+                {
+                    "id": str(video.id),
+                    "title": video.title,
+                    "description": video.description,
+                    "launch_year": video.launch_year,
+                    "opened": video.opened,
+                    "rating": video.rating.value,
+                    "duration": str(video.duration),
+                    "published": video.published,
+                    "categories": _transform_ids_to_strs(_ids=video.categories),
+                    "genres": _transform_ids_to_strs(_ids=video.genres),
+                    "cast_members": _transform_ids_to_strs(_ids=video.cast_members),
+                    "banner": self._create_image_data_expected(video.banner),
+                    "thumbnail": self._create_image_data_expected(video.thumbnail),
+                    "thumbnail_half": self._create_image_data_expected(video.thumbnail_half),
+                    "trailer": self._create_audio_video_data_expected(video.trailer),
+                    "video": self._create_audio_video_data_expected(video.video),
+                } for video in expected_data_per_page[current_page]
+            ],
+            "meta": {
+                "current_page": current_page,
+                "per_page": 2,
+                "total": 5,
+            }
+        }
+        url = f"/api/videos/?order_by=title&current_page={current_page}"
+
+        response = APIClient().get(url)
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == expected_response
