@@ -216,7 +216,6 @@ class TestProcess:
         )
         mock_video_without_association.video = media
 
-        # completed and publish
         mock_video_without_association.process(
             status=MediaStatus.COMPLETED,
             encoded_location="encoded_location_test",
@@ -246,3 +245,54 @@ class TestProcess:
         assert mock_video_without_association.video.status == MediaStatus.ERROR
         assert mock_video_without_association.video.encoded_location == original_encoded_location
         assert mock_video_without_association.published is False
+
+
+class TestValidateMediaType:
+    @pytest.mark.parametrize(
+        "media_type", [
+            MediaType.BANNER,
+            MediaType.THUMBNAIL,
+            MediaType.THUMBNAIL_HALF,
+        ]
+    )
+    def test_invalid_media_type_raise_error(
+        self,
+        mock_video_without_association: Video,
+        media_type: MediaType,
+    ) -> None:
+        with pytest.raises(ValueError, match="The media type must be VIDEO or TRAILER"):
+            mock_video_without_association.validate_audio_video_media_to_process(
+                media_type=media_type,
+            )
+
+    @pytest.mark.parametrize(
+        "media_type", [
+            MediaType.VIDEO,
+            MediaType.TRAILER,
+        ]
+    )
+    def test_valid_media_type(
+        self,
+        mock_video_without_association: Video,
+        media_type: MediaType,
+    ) -> None:
+        video_media = AudioVideoMedia(
+            name="video.mp4",
+            raw_location="raw_path",
+            encoded_location="encoded_path",
+            status=MediaStatus.COMPLETED,
+            media_type=MediaType.VIDEO,
+        )
+        trailer_media = AudioVideoMedia(
+            name="trailer.mp4",
+            raw_location="raw_path",
+            encoded_location="encoded_path",
+            status=MediaStatus.COMPLETED,
+            media_type=MediaType.TRAILER,
+        )
+        mock_video_without_association.video = video_media
+        mock_video_without_association.trailer = trailer_media
+
+        mock_video_without_association.validate_audio_video_media_to_process(
+            media_type=media_type,
+        )
