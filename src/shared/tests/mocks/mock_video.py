@@ -1,6 +1,6 @@
 from decimal import Decimal
 from unittest.mock import create_autospec
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import pytest
 
@@ -77,6 +77,22 @@ def mock_video_without_media(
         categories={mock_movie_category.id},
         genres={genre.id},
         cast_members={cast_member.id},
+        opened=True,
+    )
+
+
+@pytest.fixture
+def mock_video_without_association(
+) -> Video:
+    return Video(
+        title="Sample Video",
+        description="A test video",
+        launch_year=2022,
+        duration=Decimal("120.50"),
+        rating=Rating.AGE_12,
+        categories={uuid4()},
+        genres={uuid4()},
+        cast_members={uuid4()},
         opened=True,
     )
 
