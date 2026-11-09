@@ -2,7 +2,6 @@ from dataclasses import dataclass, field
 from decimal import Decimal
 from uuid import UUID
 
-from src.core.video.application.use_cases.exceptions import InvalidMediaType, MediaNotFound
 from src.core.video.domain.value_objects import MediaStatus, MediaType
 from src.core.video.domain.value_objects import (
     Rating,
