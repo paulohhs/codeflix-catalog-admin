@@ -2,7 +2,8 @@ from dataclasses import dataclass, field
 from decimal import Decimal
 from uuid import UUID
 
-from src.core.video.domain.value_objects import MediaStatus
+from src.core.video.application.use_cases.exceptions import InvalidMediaType, MediaNotFound
+from src.core.video.domain.value_objects import MediaStatus, MediaType
 from src.core.video.domain.value_objects import (
     Rating,
     ImageMedia,
@@ -111,3 +112,36 @@ class Video(Entity):
     def update_video_media(self, video: AudioVideoMedia) -> None:
         self.video = video
         self.validate()
+
+    def process(self, status, encoded_location):
+        if status == MediaStatus.COMPLETED:
+            self.video = self.video.complete(encoded_location)
+            self.publish()
+        else:
+            self.video = self.video.fail()
+
+        self.validate()
+
+    def validate_audio_video_media_to_process(
+        self,
+        media_type: MediaType,
+    ) -> None:
+        video_type = MediaType.VIDEO
+        trailer_type = MediaType.TRAILER
+
+        error = None
+
+        if media_type not in [video_type, trailer_type]:
+            error = "The media type must be VIDEO or TRAILER"
+
+        elif media_type == MediaType.VIDEO:
+            if not self.video:
+                error = "Video must have media to be processed"
+
+        elif media_type == MediaType.TRAILER:
+            if not self.trailer:
+                error = "Video must have media to be processed"
+
+        if error:
+            self.notification.add_error(error)
+            self.validate()
