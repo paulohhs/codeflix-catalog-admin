@@ -29,3 +29,4 @@ class MessageBus(AbstractMessageBus):
                     handler.handle(event)
                 except Exception as e:
                     logger.exception("Exception handling event %s", event)
+                    continue
