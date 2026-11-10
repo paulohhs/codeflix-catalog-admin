@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from src.core.video.application.use_cases.exceptions import VideoNotFound, MediaNotFound
+from src.core.video.application.use_cases.exceptions import VideoNotFound
 from src.core.video.domain.repository import VideoRepository
 from src.core.video.domain.value_objects import MediaStatus, MediaType
 
