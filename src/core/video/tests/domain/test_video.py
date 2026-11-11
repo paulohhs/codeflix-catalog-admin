@@ -3,7 +3,14 @@ from decimal import Decimal
 
 import pytest
 
-from src.core.video.domain.value_objects import Rating, ImageMedia, AudioVideoMedia, MediaStatus
+from src.core.video.domain.events.events import AudioVideoMediaUpdated
+from src.core.video.domain.value_objects import (
+    Rating,
+    ImageMedia,
+    AudioVideoMedia,
+    MediaStatus,
+    MediaType,
+)
 from src.core.video.domain.video import Video
 
 
@@ -45,27 +52,29 @@ class TestVideo:
         cast_member_ids = {uuid.uuid4(), uuid.uuid4()}
         banner = ImageMedia(
             name="Banner test",
-            location="",
+            raw_location="",
         )
         thumbnail = ImageMedia(
             name="Thumbnail test",
-            location="",
+            raw_location="",
         )
         thumbnail_half = ImageMedia(
             name="Thumbnail Half test",
-            location="",
+            raw_location="",
         )
         trailer = AudioVideoMedia(
             name="Trailer test",
             raw_location="raw test location",
             encoded_location="encoded test location",
             status=MediaStatus.COMPLETED,
+            media_type=MediaType.VIDEO
         )
         media_video = AudioVideoMedia(
             name="Media Video test",
             raw_location="raw test location",
             encoded_location="encoded test location",
             status=MediaStatus.COMPLETED,
+            media_type=MediaType.VIDEO
         )
 
         video = Video(
@@ -135,3 +144,168 @@ class TestVideo:
                 genres=genre_ids,
                 cast_members=cast_member_ids,
             )
+
+
+class TestPublish:
+    def test_publish_video_without_media(
+        self,
+        mock_video_without_association: Video
+    ) -> None:
+        with pytest.raises(ValueError, match="Video media is required to publish the video"):
+            mock_video_without_association.publish()
+
+    def test_publish_video_with_pending_media(
+        self,
+        mock_video_without_association: Video
+    ) -> None:
+        mock_video_without_association.video = AudioVideoMedia(
+            name="video.mp4",
+            raw_location="raw_path",
+            encoded_location="",
+            status=MediaStatus.PROCESSING,
+            media_type=MediaType.VIDEO,
+        )
+        with pytest.raises(ValueError, match="Video must be fully processed to be published"):
+            mock_video_without_association.publish()
+
+    def test_publish_video_with_completed_media(
+        self,
+        mock_video_without_association: Video
+    ) -> None:
+        mock_video_without_association.video = AudioVideoMedia(
+            name="video.mp4",
+            raw_location="raw_path",
+            encoded_location="encoded_path",
+            status=MediaStatus.COMPLETED,
+            media_type=MediaType.VIDEO,
+        )
+        mock_video_without_association.publish()
+        assert mock_video_without_association.published is True
+
+
+class TestUpdateVideoMedia:
+    def test_update_video_and_append_event(self, mock_video_without_association: Video) -> None:
+        media = AudioVideoMedia(
+            name="video.mp4",
+            raw_location="raw_path",
+            encoded_location="encoded_path",
+            status=MediaStatus.COMPLETED,
+            media_type=MediaType.VIDEO,
+        )
+        mock_video_without_association.update_video_media(media)
+        assert mock_video_without_association.video == media
+        assert mock_video_without_association.events == [AudioVideoMediaUpdated(
+            aggregate_id=mock_video_without_association.id,
+            file_path=media.raw_location,
+            media_type=MediaType.VIDEO,
+        )]
+
+
+class TestProcess:
+    @pytest.mark.parametrize(
+        "media_name, media_type", [
+            ("video.mp4", MediaType.VIDEO),
+            ("trailer.mp4", MediaType.TRAILER),
+        ]
+    )
+    def test_process_audio_video_media_completed_and_publish(
+        self,
+        mock_video_without_association: Video,
+        media_name,
+        media_type,
+    ) -> None:
+        original_encoded_location = "encoded_path"
+        media = AudioVideoMedia(
+            name=media_name,
+            raw_location="raw_path",
+            encoded_location=original_encoded_location,
+            status=MediaStatus.COMPLETED,
+            media_type=media_type,
+        )
+        setattr(mock_video_without_association, media_type.value.lower(), media)
+
+        mock_video_without_association.process(
+            status=MediaStatus.COMPLETED,
+            encoded_location="encoded_location_test",
+            media_type=media_type,
+        )
+        audio_video_media = getattr(mock_video_without_association, media_type.value.lower())
+        assert audio_video_media.status == MediaStatus.COMPLETED
+        assert audio_video_media.encoded_location == "encoded_location_test"
+
+        if media_type == MediaType.VIDEO:
+            assert mock_video_without_association.published is True
+
+    def test_process_audio_video_fail(
+        self,
+        mock_video_without_association: Video
+    ) -> None:
+        original_encoded_location = "encoded_path"
+        media = AudioVideoMedia(
+            name="video.mp4",
+            raw_location="raw_path",
+            encoded_location=original_encoded_location,
+            status=MediaStatus.COMPLETED,
+            media_type=MediaType.VIDEO,
+        )
+        mock_video_without_association.video = media
+
+        mock_video_without_association.process(
+            status=MediaStatus.PROCESSING,
+            encoded_location="encoded_location_test",
+            media_type=MediaType.VIDEO,
+        )
+        assert mock_video_without_association.video.status == MediaStatus.ERROR
+        assert mock_video_without_association.video.encoded_location == original_encoded_location
+        assert mock_video_without_association.published is False
+
+
+class TestValidateMediaType:
+    @pytest.mark.parametrize(
+        "media_type", [
+            MediaType.BANNER,
+            MediaType.THUMBNAIL,
+            MediaType.THUMBNAIL_HALF,
+        ]
+    )
+    def test_invalid_media_type_raise_error(
+        self,
+        mock_video_without_association: Video,
+        media_type: MediaType,
+    ) -> None:
+        with pytest.raises(ValueError, match="The media type must be VIDEO or TRAILER"):
+            mock_video_without_association.validate_audio_video_media_to_process(
+                media_type=media_type,
+            )
+
+    @pytest.mark.parametrize(
+        "media_type", [
+            MediaType.VIDEO,
+            MediaType.TRAILER,
+        ]
+    )
+    def test_valid_media_type(
+        self,
+        mock_video_without_association: Video,
+        media_type: MediaType,
+    ) -> None:
+        video_media = AudioVideoMedia(
+            name="video.mp4",
+            raw_location="raw_path",
+            encoded_location="encoded_path",
+            status=MediaStatus.COMPLETED,
+            media_type=MediaType.VIDEO,
+        )
+        trailer_media = AudioVideoMedia(
+            name="trailer.mp4",
+            raw_location="raw_path",
+            encoded_location="encoded_path",
+            status=MediaStatus.COMPLETED,
+            media_type=MediaType.TRAILER,
+        )
+        mock_video_without_association.video = video_media
+        mock_video_without_association.trailer = trailer_media
+
+        mock_video_without_association.validate_audio_video_media_to_process(
+            media_type=media_type,
+        )

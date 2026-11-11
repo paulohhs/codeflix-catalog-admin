@@ -85,6 +85,7 @@ class TestCanCreateVideoAndUploadMedia:
             "raw_location": f"videos/{created_video_id}/video.mp4",
             "encoded_location": "",
             "status": "PENDING",
+            "media_type": "VIDEO",
         }
         list_response = api_client.get(url)
         assert list_response.status_code == status.HTTP_200_OK

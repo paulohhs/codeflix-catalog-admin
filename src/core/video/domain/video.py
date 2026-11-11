@@ -2,13 +2,14 @@ from dataclasses import dataclass, field
 from decimal import Decimal
 from uuid import UUID
 
-from src.core.video.domain.value_objects import MediaStatus
+from src.core.video.domain.value_objects import MediaStatus, MediaType
 from src.core.video.domain.value_objects import (
     Rating,
     ImageMedia,
     AudioVideoMedia,
 )
 from src.core._shared.domain.entity import Entity
+from src.core.video.domain.events.events import AudioVideoMediaUpdated
 
 
 @dataclass
@@ -111,3 +112,47 @@ class Video(Entity):
     def update_video_media(self, video: AudioVideoMedia) -> None:
         self.video = video
         self.validate()
+
+        self.dispatch(AudioVideoMediaUpdated(
+            aggregate_id=self.id,
+            file_path=video.raw_location,
+            media_type=MediaType.VIDEO,
+        ))
+
+    def process(self, status, encoded_location, media_type):
+        fmt_media_type = media_type.value.lower()
+        media = getattr(self, fmt_media_type)
+
+        if status == MediaStatus.COMPLETED:
+            setattr(self, fmt_media_type, media.complete(encoded_location))
+
+            if media_type == MediaType.VIDEO:
+                self.publish()
+        else:
+            setattr(self, fmt_media_type, media.fail())
+
+        self.validate()
+
+    def validate_audio_video_media_to_process(
+        self,
+        media_type: MediaType,
+    ) -> None:
+        video_type = MediaType.VIDEO
+        trailer_type = MediaType.TRAILER
+
+        error = None
+
+        if media_type not in [video_type, trailer_type]:
+            error = "The media type must be VIDEO or TRAILER"
+
+        elif media_type == video_type:
+            if not self.video:
+                error = "Video must have media to be processed"
+
+        elif media_type == trailer_type:
+            if not self.trailer:
+                error = "Video must have media to be processed"
+
+        if error:
+            self.notification.add_error(error)
+            self.validate()
