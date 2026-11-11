@@ -9,6 +9,7 @@ from src.core.video.domain.value_objects import (
     AudioVideoMedia,
 )
 from src.core._shared.domain.entity import Entity
+from src.core.video.domain.events.events import AudioVideoMediaUpdated
 
 
 @dataclass
@@ -111,6 +112,12 @@ class Video(Entity):
     def update_video_media(self, video: AudioVideoMedia) -> None:
         self.video = video
         self.validate()
+
+        self.dispatch(AudioVideoMediaUpdated(
+            aggregate_id=self.id,
+            file_path=video.raw_location,
+            media_type=MediaType.VIDEO,
+        ))
 
     def process(self, status, encoded_location):
         if status == MediaStatus.COMPLETED:
