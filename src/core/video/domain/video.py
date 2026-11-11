@@ -119,12 +119,17 @@ class Video(Entity):
             media_type=MediaType.VIDEO,
         ))
 
-    def process(self, status, encoded_location):
+    def process(self, status, encoded_location, media_type):
+        fmt_media_type = media_type.value.lower()
+        media = getattr(self, fmt_media_type)
+
         if status == MediaStatus.COMPLETED:
-            self.video = self.video.complete(encoded_location)
-            self.publish()
+            setattr(self, fmt_media_type, media.complete(encoded_location))
+
+            if media_type == MediaType.VIDEO:
+                self.publish()
         else:
-            self.video = self.video.fail()
+            setattr(self, fmt_media_type, media.fail())
 
         self.validate()
 
@@ -140,11 +145,11 @@ class Video(Entity):
         if media_type not in [video_type, trailer_type]:
             error = "The media type must be VIDEO or TRAILER"
 
-        elif media_type == MediaType.VIDEO:
+        elif media_type == video_type:
             if not self.video:
                 error = "Video must have media to be processed"
 
-        elif media_type == MediaType.TRAILER:
+        elif media_type == trailer_type:
             if not self.trailer:
                 error = "Video must have media to be processed"
 
