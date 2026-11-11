@@ -41,28 +41,36 @@ class TestProcessAudioVideoMedia:
         with pytest.raises(ValueError, match="The media type must be VIDEO or TRAILER"):
             use_case.execute(request=input)
 
+    @pytest.mark.parametrize(
+        "media_name, media_type", [
+            ("video.mp4", MediaType.VIDEO),
+            ("trailer.mp4", MediaType.TRAILER),
+        ]
+    )
     def test_process_audio_video_media_complete_and_publish(
         self,
         mock_video_without_association,
         mock_im_video_repository,
+        media_name,
+        media_type,
     ):
         original_encoded_location = "encoded_path"
 
         video = mock_video_without_association
         media = AudioVideoMedia(
-            name="video.mp4",
+            name=media_name,
             raw_location="raw_path",
             encoded_location=original_encoded_location,
             status=MediaStatus.COMPLETED,
-            media_type=MediaType.VIDEO,
+            media_type=media_type,
         )
-        video.video = media
+        setattr(video, media_type.value.lower(), media)
         mock_im_video_repository.videos = [video]
         input = ProcessAudioVideoMedia.Input(
             encoded_location="encoded_location_test",
             video_id=video.id,
             status=MediaStatus.COMPLETED,
-            media_type=MediaType.VIDEO,
+            media_type=media_type,
         )
 
         use_case = ProcessAudioVideoMedia(
@@ -71,10 +79,13 @@ class TestProcessAudioVideoMedia:
         use_case.execute(request=input)
 
         video_from_repo = mock_im_video_repository.get_by_id(video.id)
-        assert video_from_repo.video.status == MediaStatus.COMPLETED
-        assert video_from_repo.video.encoded_location != original_encoded_location
-        assert video_from_repo.video.encoded_location == "encoded_location_test"
-        assert video_from_repo.published is True
+        audio_video_media = getattr(video_from_repo, media_type.value.lower())
+        assert audio_video_media.status == MediaStatus.COMPLETED
+        assert audio_video_media.encoded_location != original_encoded_location
+        assert audio_video_media.encoded_location == "encoded_location_test"
+
+        if media_type == MediaType.VIDEO:
+            assert video_from_repo.published is True
 
     def test_process_audio_video_media_fail(
         self,

@@ -202,27 +202,39 @@ class TestUpdateVideoMedia:
 
 
 class TestProcess:
+    @pytest.mark.parametrize(
+        "media_name, media_type", [
+            ("video.mp4", MediaType.VIDEO),
+            ("trailer.mp4", MediaType.TRAILER),
+        ]
+    )
     def test_process_audio_video_media_completed_and_publish(
         self,
-        mock_video_without_association: Video
+        mock_video_without_association: Video,
+        media_name,
+        media_type,
     ) -> None:
         original_encoded_location = "encoded_path"
         media = AudioVideoMedia(
-            name="video.mp4",
+            name=media_name,
             raw_location="raw_path",
             encoded_location=original_encoded_location,
             status=MediaStatus.COMPLETED,
-            media_type=MediaType.VIDEO,
+            media_type=media_type,
         )
-        mock_video_without_association.video = media
+        setattr(mock_video_without_association, media_type.value.lower(), media)
 
         mock_video_without_association.process(
             status=MediaStatus.COMPLETED,
             encoded_location="encoded_location_test",
+            media_type=media_type,
         )
-        assert mock_video_without_association.video.status == MediaStatus.COMPLETED
-        assert mock_video_without_association.video.encoded_location == "encoded_location_test"
-        assert mock_video_without_association.published is True
+        audio_video_media = getattr(mock_video_without_association, media_type.value.lower())
+        assert audio_video_media.status == MediaStatus.COMPLETED
+        assert audio_video_media.encoded_location == "encoded_location_test"
+
+        if media_type == MediaType.VIDEO:
+            assert mock_video_without_association.published is True
 
     def test_process_audio_video_fail(
         self,
@@ -241,6 +253,7 @@ class TestProcess:
         mock_video_without_association.process(
             status=MediaStatus.PROCESSING,
             encoded_location="encoded_location_test",
+            media_type=MediaType.VIDEO,
         )
         assert mock_video_without_association.video.status == MediaStatus.ERROR
         assert mock_video_without_association.video.encoded_location == original_encoded_location
