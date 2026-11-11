@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
+from typing import Generic
 
-from src.core._shared.events.event import Event
+from src.core._shared.events.event import TEvent
 
 
-class Handler(ABC):
+class Handler(ABC, Generic[TEvent]):
     @abstractmethod
-    def handle(self, event: Event) -> None:
+    def handle(self, event: TEvent) -> None:
         pass
