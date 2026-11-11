@@ -28,6 +28,10 @@ class ProcessAudioVideoMedia:
         video.validate_audio_video_media_to_process(
             media_type=request.media_type,
         )
-        video.process(status=request.status, encoded_location=request.encoded_location)
+        video.process(
+            status=request.status,
+            encoded_location=request.encoded_location,
+            media_type=request.media_type,
+        )
 
         self.video_repository.update(video)
