@@ -3,6 +3,7 @@ import logging
 from uuid import UUID
 
 import pika
+from django.db import close_old_connections
 
 from src.core._shared.events.abstract_consumer import AbstractConsumer
 from src.core.video.application.use_cases.process_audio_video_media import ProcessAudioVideoMedia
@@ -22,6 +23,9 @@ class VideoConvertedRabbitMQConsumer(AbstractConsumer):
     def on_message(self, message):
         print(f"Received message: {message}")
         try:
+            # Fecha conexões vencidas ou quebradas, garantia de conexão válida
+            close_old_connections()
+
             # Body payload
             message = json.loads(message)
 
