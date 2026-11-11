@@ -194,11 +194,11 @@ class TestUpdateVideoMedia:
         )
         mock_video_without_association.update_video_media(media)
         assert mock_video_without_association.video == media
-        # assert mock_video_without_association.events == [AudioVideoMediaUpdated(
-        #     aggregate_id=mock_video_without_association.id,
-        #     file_path=media.raw_location,
-        #     media_type=MediaType.VIDEO,
-        # )]
+        assert mock_video_without_association.events == [AudioVideoMediaUpdated(
+            aggregate_id=mock_video_without_association.id,
+            file_path=media.raw_location,
+            media_type=MediaType.VIDEO,
+        )]
 
 
 class TestProcess:
